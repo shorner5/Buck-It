@@ -1,0 +1,57 @@
+<resources>
+    <string name="app_name">Buck It</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_match">Match</string>
+    <string name="title_activity_inspire">Inspire</string>
+    <string name="animTimeFast">100</string>
+    <string name="animTime">200</string>
+    <string name="animTimeSlow">400</string>
+    <string name="transit">items</string>
+    <string name="search_hint">I want to&#8230;</string>
+    <string name="buckit_uncomp">BUCK ITS</string>
+    <string name="buckit_comp">COMPLETED</string>
+    <string name="messages">MESSAGES</string>
+    <string name="matched">MATCHED</string>
+    <string name="social">FRIENDS</string>
+    <string name="profile">PROFILE</string>
+    <string name="similar">SUGGESTED</string>
+    <string name="profile_edit">View my profile</string>
+    <string name="checked_edit_text">Tap to add a story</string>
+    <string name="checked_post">Post</string>
+    <plurals name="completed_text">
+        <item quantity="one">%1$s completed \"%3$s\"</item>
+        <item quantity="other"><b>%1$s</b> and <b>%2$s</b> completed \"%3$s\"</item>
+    </plurals>
+    <string name="completed_title">COMPLETED</string>
+    <string name="add_person">Add someone</string>
+    <string name="add_confirm"><b>%1$s</b> is now on your Buck It List.</string>
+
+    <string name="suggestion">Suggestions</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_login">"Sign In "</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_non_match_password">This password does not match</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="register">Register</string>
+
+    <string name="no_data">:(</string>
+    <string name="no_data_subtitle">No Buck It\'s Added</string>
+    <string name="new_buckit">Create a new Buck It</string>
+    <string name="add_new_buckit">Create and add \"<b>%1$s</b>\"</string>
+    <string name="repeat"><b>%1$s</b> is already on your Buck It List</string>
+
+</resources>

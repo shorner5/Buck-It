@@ -1,0 +1,144 @@
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    card_view:cardUseCompatPadding="true"
+    card_view:cardPreventCornerOverlap="false"
+    card_view:cardBackgroundColor="@android:color/white"
+    card_view:cardElevation="8dp"
+    card_view:cardCornerRadius="8dp"
+    android:background="@android:color/white"
+    android:foreground="?android:attr/selectableItemBackground"
+    >
+
+    <RelativeLayout
+        android:layout_width="300dp"
+        android:layout_height="400dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/checked_title"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:textColor="@color/accent_color_light"
+            android:gravity="center_horizontal"
+            />
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/checked_title"
+            android:src="@drawable/list_divider"
+            android:layout_marginBottom="5dp"/>
+
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/checked_subtitle"
+            android:textColor="#a7a7a7"
+            android:textStyle="italic"
+            android:gravity="start|center_vertical"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/checked_title" />
+
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/checked_subtitle"
+            android:src="@drawable/list_divider"
+            android:layout_marginBottom="5dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/checked_button_row"
+            android:layout_margin="10dp"
+            android:id="@+id/checked_edit_text"
+            android:layout_centerHorizontal="true"
+            android:hint="@string/checked_edit_text"
+            android:gravity="center"
+            android:background="@drawable/edit_text_design"
+            android:inputType="textMultiLine|textCapSentences"
+            android:layout_below="@+id/checked_subtitle" />
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_above="@+id/checked_button_row"
+            android:src="@drawable/list_divider" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/checked_button_row"
+            android:layout_above="@+id/checked_post"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignLeft="@+id/checked_post"
+            android:layout_alignStart="@+id/checked_post">
+
+            <ImageButton
+                android:id="@+id/checked_photo"
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_camera"
+                android:layout_marginBottom="1dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:layout_weight=".5"/>
+
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_share"
+                android:id="@+id/checked_share"
+                android:background="?android:attr/selectableItemBackground"
+                android:layout_weight=".5"/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_above="@+id/checked_post"
+            android:src="@drawable/list_divider"/>
+
+        <Button
+            android:id="@+id/checked_post"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_width="250dp"
+            android:layout_height="50dp"
+            android:text="@string/checked_post"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/accent_color_light"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            />
+
+
+
+
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>
+
+
+

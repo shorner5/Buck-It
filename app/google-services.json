@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1037631017978",
+    "firebase_url": "https://buck-it-d6974.firebaseio.com",
+    "project_id": "buck-it-d6974",
+    "storage_bucket": "buck-it-d6974.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1037631017978:android:fbc58f68f75f4b11",
+        "android_client_info": {
+          "package_name": "stuhorner.com.buckit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1037631017978-0ngtvmhfk4kmqiijv6m3l99fpupdhjth.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2psD_vLyW10jogyJi6PuLgohHiGRpzNw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
