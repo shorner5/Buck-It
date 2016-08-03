@@ -58,8 +58,8 @@ public class MainActivity extends AppCompatActivity {
         tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setContentDescription(R.string.buckit_uncomp).setIcon(R.drawable.ic_list));
         tabLayout.addTab(tabLayout.newTab().setContentDescription(R.string.messages).setIcon(R.drawable.ic_chat));
-        tabLayout.addTab(tabLayout.newTab().setContentDescription(R.string.social).setIcon(R.drawable.ic_social));
         tabLayout.addTab(tabLayout.newTab().setContentDescription(R.string.similar).setIcon(R.drawable.ic_profile));
+        tabLayout.addTab(tabLayout.newTab().setContentDescription(R.string.social).setIcon(R.drawable.ic_social));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         //Color tab icons
@@ -77,7 +77,9 @@ public class MainActivity extends AppCompatActivity {
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout) {
             @Override
             public void onPageScrollStateChanged(int state) {
-                appBarLayout.setExpanded(true, true);
+                if (appBarLayout != null) {
+                    appBarLayout.setExpanded(true, true);
+                }
             }
         });
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {

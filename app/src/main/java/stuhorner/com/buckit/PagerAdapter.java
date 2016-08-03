@@ -17,17 +17,13 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
 
         switch (position) {
             case 0:
-                BuckitList tab1 = new BuckitList();
-                return tab1;
+                return new BuckitList();
             case 1:
-                Chat tab2 = new Chat();
-                return tab2;
+                return new Chat();
             case 2:
-                Social tab3 = new Social();
-                return tab3;
+                return new MatchesFragment();
             case 3:
-                MatchesFragment tab4 = new MatchesFragment();
-                return tab4;
+                return new Social();
             default:
                 return null;
         }

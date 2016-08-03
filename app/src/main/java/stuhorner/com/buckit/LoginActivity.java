@@ -14,6 +14,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -34,6 +37,8 @@ public class LoginActivity extends Activity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference rootRef = database.getReference();
+    DatabaseReference geoRef = FirebaseDatabase.getInstance().getReference("geoFire");
+    GeoFire geoFire = new GeoFire(geoRef);
 
     // UI references.
     private EditText mEmailView;
@@ -66,6 +71,7 @@ public class LoginActivity extends Activity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     showProgress(false);
+                    geoFire.setLocation(user.getUid(), new GeoLocation(37.7853, -122.405697));
                     Intent MainActivityIntent = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(MainActivityIntent);
                     finish();
