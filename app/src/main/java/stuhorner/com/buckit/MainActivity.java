@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
             fab.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Intent intent = new Intent(MainActivity.this, Inspire.class);
-                    intent.putExtra("size", getBuckit_size());
                     startActivity(intent);
                 }
             });
@@ -135,13 +134,5 @@ public class MainActivity extends AppCompatActivity {
         else {
             super.onBackPressed();
         }
-    }
-
-    public void setBuckit_size(int size) {
-        buckit_size = size;
-    }
-
-    public int getBuckit_size() {
-        return buckit_size;
     }
 }

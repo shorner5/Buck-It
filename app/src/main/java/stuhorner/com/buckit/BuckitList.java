@@ -17,7 +17,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -33,13 +32,14 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 
 /**
  * Created by Stu on 12/14/2015.
  */
 public class BuckitList extends Fragment {
     public final static String MATCH_ITEM = "com.stuhorner.buckit.MATCH_ITEM";
-    private ArrayList<String> bucket_items = new ArrayList<>();
+    private LinkedList<String> bucket_items = new LinkedList<>();
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseUser mUser = mAuth.getCurrentUser();
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -67,7 +67,7 @@ public class BuckitList extends Fragment {
         initData();
 
         //initialize the adapter for the recyclerview
-        adapter = new RVAdapter(getFragmentManager(), bucket_items);
+        adapter = new RVAdapter(getFragmentManager(), bucket_items, false);
         rv.setAdapter(adapter);
         addListListener();
 
@@ -89,14 +89,10 @@ public class BuckitList extends Fragment {
         });
 
         //listen for swipes and long presses
-        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT) {
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                rootRef.child("users").child(mUser.getUid()).child("buckits").child(Integer.toString(viewHolder.getAdapterPosition())).setValue(bucket_items.get(target.getAdapterPosition()));
-                rootRef.child("users").child(mUser.getUid()).child("buckits").child(Integer.toString(target.getAdapterPosition())).setValue(bucket_items.get(viewHolder.getAdapterPosition()));
-                Collections.swap(bucket_items, viewHolder.getAdapterPosition(), target.getAdapterPosition());
-                adapter.notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
-                return true;
+                return false;
             }
 
             @Override
@@ -109,8 +105,6 @@ public class BuckitList extends Fragment {
                 //remove item from the list and update the list's size
                 bucket_items.remove(removeIndex);
                 adapter.notifyItemRemoved(removeIndex);
-                ((MainActivity) getActivity()).setBuckit_size(bucket_items.size());
-
                 BuckitList.this.removeItemFromFirebase(removeText);
 
                 if (bucket_items.size() == 0) {
@@ -129,10 +123,7 @@ public class BuckitList extends Fragment {
 
     public void removeItemFromFirebase(final String removeItem) {
         //remove the item from the user's list
-        for (int i = 0; i < bucket_items.size(); i++) {
-            rootRef.child("users").child(mUser.getUid()).child("buckits").child(Integer.toString(i)).setValue(bucket_items.get(i));
-        }
-        rootRef.child("users").child(mUser.getUid()).child("buckits").child(Integer.toString(bucket_items.size())).setValue(null);
+        rootRef.child("users").child(mUser.getUid()).child("buckits").child(removeItem).setValue(null);
 
         //remove the user from the item's list of users
         Query query = rootRef.child("buckits").child(removeItem).child("users").orderByValue().startAt(mUser.getUid()).limitToFirst(1);
@@ -175,16 +166,11 @@ public class BuckitList extends Fragment {
             rootRef.child("users").child(mUser.getUid()).child("buckits").addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    if (dataSnapshot != null) {
-                        bucket_items.add(dataSnapshot.getValue().toString());
-                        Log.d("added item", dataSnapshot.getValue().toString());
-                        Log.d("bucket size", Integer.toString(bucket_items.size()));
+                    if (dataSnapshot.getKey() != null) {
+                        bucket_items.add(dataSnapshot.getKey());
                         showProgress(false);
                         showEmptyList(false);
                         adapter.notifyDataSetChanged();
-                        if (getActivity() != null) {
-                            ((MainActivity) getActivity()).setBuckit_size(bucket_items.size());
-                        }
                     }
                 }
 
@@ -194,6 +180,13 @@ public class BuckitList extends Fragment {
 
                 @Override
                 public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.getKey() != null) {
+                        bucket_items.remove(dataSnapshot.getKey());
+                        adapter.notifyDataSetChanged();
+                        if (bucket_items.isEmpty()) {
+                            showEmptyList(true);
+                        }
+                    }
                 }
 
                 @Override

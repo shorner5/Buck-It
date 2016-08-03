@@ -279,10 +279,12 @@ public class CreateProfileActivity extends AppCompatActivity {
         if (requestCode == GALLERY_REQUEST && resultCode == Activity.RESULT_OK) {
             //upload image
             Uri selectedImage = data.getData();
-            BitmapUploadTask task = new BitmapUploadTask(getPathFromURI(selectedImage), "users/" + mUser.getUid() + "profilePicture");
+            BitmapUploadTask task = new BitmapUploadTask(getPathFromURI(selectedImage), "users/" + mUser.getUid() + "/profilePicture");
             task.execute();
 
             //save the result
+            userRef.child("discoverable").setValue("1");
+            userRef.child("profile_created").setValue("1");
             SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
             editor.putBoolean("profile_created", true);
             editor.apply();

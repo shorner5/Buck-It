@@ -102,10 +102,6 @@ public class MatchActivity extends AppCompatActivity {
         initButtons();
         initData();
         initFlingContainer();
-
-        SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-        editor.putBoolean("discoverable", true);
-        editor.apply();
     }
 
     private void notDiscoverable() {
@@ -243,7 +239,6 @@ public class MatchActivity extends AppCompatActivity {
         else if (requestCode == CREATE_PROFILE_REQUEST) {
             if (resultCode != RESULT_CANCELED) {
                 discoverable();
-                rootRef.child("users").child(mUser.getUid()).child("discoverable").setValue("1");
                 addTransition(noButton, 0);
                 addTransition(chatButton, 1);
                 addTransition(yesButton, 2);
@@ -392,8 +387,10 @@ public class MatchActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (geoQuery != null)
             geoQuery.removeAllListeners();
-        mProgressView.setVisibility(View.INVISIBLE);
+        showProgress(false);
+        showEmptyList(false);
         Button enable = (Button) findViewById(R.id.enable_discovery);
+
         if (enable != null) {
             enable.setVisibility(View.INVISIBLE);
         }
@@ -527,7 +524,7 @@ public class MatchActivity extends AppCompatActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     FragmentManager fm = getSupportFragmentManager();
-                    Checked check = Checked.newInstance(getIntent().getStringExtra(BuckitList.MATCH_ITEM));
+                    Checked check = Checked.newInstance(getIntent().getStringExtra(BuckitList.MATCH_ITEM), true);
                     check.show(fm, "hello");
                 }
             });

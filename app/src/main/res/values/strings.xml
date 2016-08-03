@@ -53,6 +53,7 @@
     <string name="new_buckit">Create a new Buck It</string>
     <string name="add_new_buckit">Create and add \"<b>%1$s</b>\"</string>
     <string name="repeat"><b>%1$s</b> is already on your Buck It List</string>
+    <string name="no_data_completed">Check off some Buck Its today</string>
 
     <string name="enable_discovery">Enable Discovery</string>
     <string name="next">Next</string>

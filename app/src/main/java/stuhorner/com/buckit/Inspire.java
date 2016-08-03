@@ -3,7 +3,6 @@ package stuhorner.com.buckit;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -33,11 +32,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -49,10 +47,8 @@ public class Inspire extends AppCompatActivity {
     AppBarLayout appBarLayout;
     InspireRVAdapter adapter;
     EditText editText;
-    boolean suggestionsReady = false, itemAdded = false;
     String newItem;
-    ArrayList<String> mBuckitItems = new ArrayList<>();
-    PriorityQueue<Pair<String, Double>> buckitItems = new PriorityQueue<Pair<String, Double>>(20, new Comparator<Pair<String, Double>>() {
+    PriorityQueue<Pair<String, Double>> buckitItems = new PriorityQueue<>(20, new Comparator<Pair<String, Double>>() {
         @Override
         public int compare(Pair<String, Double> lhs, Pair<String, Double> rhs) {
             if (lhs.second.equals(rhs.second)) {
@@ -89,27 +85,6 @@ public class Inspire extends AppCompatActivity {
         initAppBarLayout();
         initToolbar();
         initEditText();
-        initBuckIts();
-    }
-
-    private void initBuckIts() {
-        rootRef.child("users").child(mUser.getUid()).child("buckits").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mBuckitItems = (ArrayList<String>)dataSnapshot.getValue();
-                suggestionsReady = true;
-
-                if (itemAdded && (mBuckitItems == null || !mBuckitItems.contains(newItem))) {
-                    updateFirebase();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
     }
 
     private void initToolbar() {
@@ -223,11 +198,10 @@ public class Inspire extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 inspire_items.clear();
                 initSearch(searchString);
-                Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
-                while (iterator.hasNext()) {
-                    String toCompare = iterator.next().getKey();
+                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+                    String toCompare = dataSnapshot1.getKey();
                     NormalizedLevenshtein comparison = new NormalizedLevenshtein();
-                    buckitItems.add(new Pair<String, Double>(toCompare, comparison.similarity(searchString, toCompare)));
+                    buckitItems.add(new Pair<>(toCompare, comparison.similarity(searchString, toCompare)));
                 }
                 for (int i = 0; i < 25 && buckitItems.size() > 0; i++) {
                     Pair<String, Double> potential = buckitItems.poll();
@@ -256,9 +230,8 @@ public class Inspire extends AppCompatActivity {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
-                while (iterator.hasNext()) {
-                    inspire_items.add(1, iterator.next().getKey());
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    inspire_items.add(1, data.getKey());
                     adapter.notifyDataSetChanged();
                 }
                 showProgress(false);
@@ -274,9 +247,11 @@ public class Inspire extends AppCompatActivity {
     private void initRecyclerView() {
         //initialize the recyclerview
         RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.inspire_rv);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new InspireRVAdapter(inspire_items, getApplicationContext());
-        mRecyclerView.setAdapter(adapter);
+        if (mRecyclerView != null) {
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+            adapter = new InspireRVAdapter(inspire_items, getApplicationContext());
+            mRecyclerView.setAdapter(adapter);
+        }
 
         ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
             @Override
@@ -289,21 +264,15 @@ public class Inspire extends AppCompatActivity {
                     imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
                 }
                 else {
-                    itemAdded = true;
-                    if (suggestionsReady && (mBuckitItems == null || !mBuckitItems.contains(newItem))) {
-                        updateFirebase();
-                        v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.scale_down_up));
-                    }
-                    else {
-                        Snackbar.make(recyclerView, String.format(getString(R.string.repeat), newItem), Snackbar.LENGTH_SHORT).show();
-                    }
+                    updateFirebase();
+                    v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.scale_down_up));
                 }
             }
         });
     }
 
     private void updateFirebase(){
-        rootRef.child("users").child(mUser.getUid()).child("buckits").child(Integer.toString(getIntent().getIntExtra("size", 0))).setValue(newItem);
+        rootRef.child("users").child(mUser.getUid()).child("buckits").child(newItem).setValue(ServerValue.TIMESTAMP);
         rootRef.child("buckits").child(newItem).child("users").push().setValue(mUser.getUid());
         rootRef.child("buckits_index").child(newItem).setValue(0);
 

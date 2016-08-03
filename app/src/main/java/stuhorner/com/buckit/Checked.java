@@ -27,9 +27,12 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 
 
 /**
@@ -37,23 +40,24 @@ import com.google.firebase.database.ServerValue;
  */
 public class Checked extends DialogFragment {
     String match_item;
+    boolean checked;
     EditText editText;
     ImageButton addPhoto, share;
     Button post, addPerson;
-    int position;
     private final static int GALLERY_REQUEST = 1;
 
     //Firebase references
     private FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
     DatabaseReference socialRef = FirebaseDatabase.getInstance().getReference("social/" + mUser.getUid());
     DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users/" + mUser.getUid());
+    DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
 
 
-    static Checked newInstance(String match_item, int position){
+    static Checked newInstance(String match_item, boolean checked){
         Checked c = new Checked();
         Bundle args = new Bundle();
         args.putString("title", match_item);
-        args.putInt("position", position);
+        args.putBoolean("checked", checked);
         c.setArguments(args);
         return c;
     }
@@ -62,24 +66,34 @@ public class Checked extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View view = getActivity().getLayoutInflater().inflate(R.layout.checked, new LinearLayout(getActivity()), false);
         this.match_item = getArguments().getString("title");
-        this.position = getArguments().getInt("position");
-
+        this.checked = getArguments().getBoolean("checked");
         Dialog builder = new Dialog(getActivity());
-        builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        builder.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        builder.setContentView(view);
 
-        editText = (EditText) view.findViewById(R.id.checked_edit_text);
-        editText.setLines(10);
-        editText.setHorizontallyScrolling(false);
-        addPhoto = (ImageButton) view.findViewById(R.id.checked_photo);
-        post = (Button) view.findViewById(R.id.checked_post);
-        addPerson = (Button) view.findViewById(R.id.checked_subtitle);
-        share = (ImageButton) view.findViewById(R.id.checked_share);
-        handleButtons();
-        handleEditText();
-        addPerson.setText(getResources().getQuantityString(R.plurals.completed_text, 2, "Stu", "Kanye", match_item));
+        if (checked) {
+            builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            builder.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            builder.setContentView(view);
 
+            editText = (EditText) view.findViewById(R.id.checked_edit_text);
+            editText.setLines(10);
+            editText.setHorizontallyScrolling(false);
+            addPhoto = (ImageButton) view.findViewById(R.id.checked_photo);
+            post = (Button) view.findViewById(R.id.checked_post);
+            addPerson = (Button) view.findViewById(R.id.checked_subtitle);
+            share = (ImageButton) view.findViewById(R.id.checked_share);
+            handleButtons();
+            handleEditText();
+            addPerson.setText(getResources().getQuantityString(R.plurals.completed_text, 2, "Stu", "Kanye", match_item));
+
+            userRef.child("buckits").child(match_item).setValue(null);
+            userRef.child("completed").child(match_item).setValue(1);
+
+        }
+        else {
+            userRef.child("buckits").child(match_item).setValue(1);
+            userRef.child("completed").child(match_item).setValue(null);
+            dismiss();
+        }
         return builder;
     }
 
@@ -117,11 +131,7 @@ public class Checked extends DialogFragment {
         post.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                socialRef.child(addPerson.getText().toString()).child("time").setValue(ServerValue.TIMESTAMP);
-                socialRef.child(addPerson.getText().toString()).child("text").setValue(editText.getText().toString());
-                userRef.child("buckits").child(Integer.toString(position)).setValue(null);
-
-                dismiss();
+                post();
             }
         });
         share.setOnClickListener(new View.OnClickListener() {
@@ -140,6 +150,25 @@ public class Checked extends DialogFragment {
 
             }
         });
+    }
+
+    private void post() {
+        socialRef.child(addPerson.getText().toString()).child("text").setValue(editText.getText().toString());
+        //todo: test this
+        userRef.child("matches").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    rootRef.child("users").child(data.getKey()).child("social").child(addPerson.getText().toString()).setValue(ServerValue.TIMESTAMP);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        dismiss();
     }
 
     public  boolean isStoragePermissionGranted() {
@@ -182,7 +211,7 @@ public class Checked extends DialogFragment {
             Uri selectedImage = data.getData();
             BitmapUploadTask task = new BitmapUploadTask(getPathFromURI(selectedImage), "social/" + mUser.getUid() + "/" + addPerson.getText().toString() + "/img");
             task.execute();
-            addPhoto.setColorFilter(getResources().getColor(R.color.accent_color_light));
+            addPhoto.setColorFilter(getResources().getColor(R.color.accent_color_dark));
         }
     }
 

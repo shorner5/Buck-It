@@ -15,10 +15,12 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ItemsViewHolder>{
-    private List<String> bucket_items = new ArrayList<>();
+    private List<String> bucket_items = new LinkedList<>();
+    private boolean completed;
     private FragmentManager fm;
     public static class ItemsViewHolder extends RecyclerView.ViewHolder{
         TextView itemName;
@@ -31,9 +33,10 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ItemsViewHolder>{
         }
     }
 
-    RVAdapter(FragmentManager fm, ArrayList<String> bucket_items) {
+    RVAdapter(FragmentManager fm, LinkedList<String> bucket_items, boolean completed) {
         this.bucket_items = bucket_items;
         this.fm = fm;
+        this.completed = completed;
     }
 
 
@@ -50,11 +53,14 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ItemsViewHolder>{
     @Override
     public void onBindViewHolder(final ItemsViewHolder itemViewHolder, final int i) {
         itemViewHolder.itemName.setText(bucket_items.get(i));
+        if (completed) {
+            itemViewHolder.checkBox.setChecked(true);
+        }
         itemViewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Checked check = Checked.newInstance(bucket_items.get(i), i);
-                check.show(fm,"hello");
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                Checked check = Checked.newInstance(bucket_items.get(i), checked);
+                check.show(fm, "hello");
             }
         });
 
