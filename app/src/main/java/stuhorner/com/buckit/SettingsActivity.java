@@ -2,15 +2,23 @@ package stuhorner.com.buckit;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -23,13 +31,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.w3c.dom.Text;
+
 import java.util.LinkedList;
 
 public class SettingsActivity extends AppCompatActivity {
     //Firebase references
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseUser mUser = mAuth.getCurrentUser();
-    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users/" + mUser.getUid());
+    private DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users/" + mUser.getUid());
+
+    private final static int PROFILE_DIMEN = 200;
 
 
     @Override
@@ -37,8 +49,9 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings);
         initToolbar();
-        initSearchSettings();
         initCompletedBuckits();
+        initProfile();
+        initSearchSettings();
 
         Button logOut = (Button) findViewById(R.id.setting_logout);
         if (logOut != null) {
@@ -53,6 +66,63 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void initProfile() {
+        final ImageView profilePic = (ImageView) findViewById(R.id.profile_image);
+        final TextView name = (TextView) findViewById(R.id.profile_name);
+        CardView profile = (CardView) findViewById(R.id.profile_view);
+        if (profile != null) {
+            profile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(SettingsActivity.this, ProfileActivity.class);
+                    intent.putExtra("name", name != null ? name.getText().toString() : null);
+                    intent.putExtra("uid", mUser.getUid());
+                    startActivity(intent);
+                }
+            });
+        }
+        userRef.child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null && name != null) {
+                    name.setText(dataSnapshot.getValue().toString());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+        userRef.child("profilePicSmall").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null && profilePic != null) {
+                    byte[] bytes = Base64.decode(dataSnapshot.getValue().toString().getBytes(), Base64.DEFAULT);
+                    profilePic.setImageBitmap(resizeImage(BitmapFactory.decodeByteArray(bytes,0, bytes.length), PROFILE_DIMEN, PROFILE_DIMEN));
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
+
+    private Bitmap resizeImage(Bitmap bitmap, int w, int h)
+    {
+        // load the origial Bitmap
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        // calculate the scale
+        float scaleWidth = ((float) w) / width;
+        float scaleHeight = ((float) h) / height;
+        // create a matrix for the manipulation
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+        return Bitmap.createBitmap(bitmap, 0, 0,width, height, matrix, true);
     }
 
     private void initSearchSettings() {
@@ -118,9 +188,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
@@ -133,16 +201,10 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 }
             }
-
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
         userRef.child("completed").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -154,11 +216,8 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 }
             }
-
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+            public void onCancelled(DatabaseError databaseError) { }
         });
     }
 }

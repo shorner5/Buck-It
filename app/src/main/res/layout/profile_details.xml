@@ -9,6 +9,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="fitCenter"
+            android:src="@mipmap/ic_launcher"
+            android:layout_centerInParent="true" />
+
         <TextView
             android:id="@+id/p_text"
             android:layout_width="match_parent"
@@ -19,6 +31,6 @@
             android:paddingTop="16dp"
             android:paddingRight="16dp"
             android:paddingBottom="96dp"/>
-
+        </RelativeLayout>
     </android.support.v4.widget.NestedScrollView>
 </LinearLayout>

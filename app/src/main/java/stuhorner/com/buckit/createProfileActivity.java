@@ -281,6 +281,8 @@ public class CreateProfileActivity extends AppCompatActivity {
             Uri selectedImage = data.getData();
             BitmapUploadTask task = new BitmapUploadTask(getPathFromURI(selectedImage), "users/" + mUser.getUid() + "/profilePicture");
             task.execute();
+            BitmapCompressAndUploadTask compressTask = new BitmapCompressAndUploadTask(getPathFromURI(selectedImage), "users/" + mUser.getUid() + "/profilePicSmall");
+            compressTask.execute();
 
             //save the result
             userRef.child("discoverable").setValue("1");

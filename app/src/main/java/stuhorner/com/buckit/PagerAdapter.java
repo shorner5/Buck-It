@@ -19,7 +19,7 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
             case 0:
                 return new BuckitList();
             case 1:
-                return new Chat();
+                return new ChatFragment();
             case 2:
                 return new MatchesFragment();
             case 3:

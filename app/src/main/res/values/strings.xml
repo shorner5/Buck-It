@@ -28,6 +28,7 @@
 
     <string name="card_title"><b>%1$s</b>, <b>%2$s</b></string>
     <string name="match_empty">This Buck It is unique</string>
+    <string name="no_messages">No messages</string>
 
     <string name="suggestion">Suggestions</string>
 
@@ -65,5 +66,8 @@
     <string name="age_minimum">You must be at least 18</string>
     <string name="share_text"><b>%1$s</b> on Buck It. Download it today: https://arteryapp.com</string>
     <string name="share_title">I Checked Something off my Buck It List</string>
+
+    <string name="profile_view">View my profile</string>
+    <string name="no_profile_text">I\'m new here</string>
 
 </resources>

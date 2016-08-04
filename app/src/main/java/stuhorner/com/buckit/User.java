@@ -13,8 +13,8 @@ public class User {
     int age;
     String UID;
 
-    public User() {
-
+    public User(String uid) {
+        this.UID = uid;
     }
 
     public String getName() {

@@ -33,6 +33,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 import java.util.LinkedList;
@@ -40,11 +41,11 @@ import java.util.LinkedList;
 public class MatchActivity extends AppCompatActivity {
     LinkedList<User> users = new LinkedList<>();
     LinkedList<User> userQueue = new LinkedList<>();
-    LinkedList<String> potentialUserQueue = new LinkedList<>();
-    private ImageButton yesButton;
-    private ImageButton noButton;
+    private ImageButton nextButton;
     private ImageButton chatButton;
+    private Button enable;
     private ImageView mProgressView;
+    TextView emptyList;
     SwipeFlingAdapterView flingContainer;
     CardAdapter adapter;
     boolean flung = false;
@@ -68,16 +69,20 @@ public class MatchActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_back);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        if (toolbar != null) {
+            toolbar.setNavigationIcon(R.drawable.ic_back);
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+        }
         checkboxListener();
 
+        enable = (Button) findViewById(R.id.enable_discovery);
         mProgressView = (ImageView) findViewById(R.id.match_logo);
+        emptyList = (TextView) findViewById(R.id.match_empty);
         TextView textView = (TextView) findViewById(R.id.match_text);
         item = getIntent().getStringExtra(BuckitList.MATCH_ITEM);
         if (textView != null)
@@ -94,7 +99,7 @@ public class MatchActivity extends AppCompatActivity {
     }
 
     private void discoverable() {
-        Button enable = (Button) findViewById(R.id.enable_discovery);
+        Log.d("discoverable", "hiding button");
         if (enable != null) {
             enable.setVisibility(View.GONE);
         }
@@ -102,10 +107,14 @@ public class MatchActivity extends AppCompatActivity {
         initButtons();
         initData();
         initFlingContainer();
+
+        rootRef.child("users").child(mUser.getUid()).child("discoverable").setValue("1");
+        SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+        editor.putBoolean("discoverable", true);
+        editor.apply();
     }
 
     private void notDiscoverable() {
-        final Button enable = (Button) findViewById(R.id.enable_discovery);
         if (enable != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 final Transition sharedElementEnterTransition = getWindow().getSharedElementEnterTransition();
@@ -140,9 +149,8 @@ public class MatchActivity extends AppCompatActivity {
         SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
         if (pref.getBoolean("profile_created", false)) {
             discoverable();
-            addTransition(noButton, 0);
-            addTransition(chatButton, 1);
-            addTransition(yesButton, 2);
+            addTransition(nextButton, 1);
+            addTransition(chatButton, 0);
             Button enable = (Button) findViewById(R.id.enable_discovery);
             if (enable != null) {
                 enable.setVisibility(View.INVISIBLE);
@@ -154,7 +162,6 @@ public class MatchActivity extends AppCompatActivity {
     }
 
     private void createProfile() {
-        Button enable = (Button) findViewById(R.id.enable_discovery);
         Intent intent = new Intent(MatchActivity.this, CreateProfileActivity.class);
         Pair<View, String> p3 = Pair.create((View) enable, "button");
 
@@ -173,26 +180,27 @@ public class MatchActivity extends AppCompatActivity {
             @Override
             public void removeFirstObjectInAdapter() {
                 users.remove(0);
-                adapter.notifyDataSetChanged();
-                if (users.isEmpty() && (!userQueue.isEmpty() || !potentialUserQueue.isEmpty())) {
-                    showProgress(true);
-                }
-                else if (userQueue.isEmpty() && users.isEmpty() && potentialUserQueue.isEmpty()){
+                if (userQueue.isEmpty() && users.isEmpty()) {
                     showEmptyList(true);
                 }
+                else if (!userQueue.isEmpty() && users.isEmpty()){
+                    showProgress(true);
+                }
+                adapter.notifyDataSetChanged();
+
             }
 
             @Override
             public void onLeftCardExit(Object dataObject) {
                 final Animation shake = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.wobble);
-                if (flung) { noButton.startAnimation(shake); }
+                if (flung) { nextButton.startAnimation(shake); }
                 flung = false;
             }
 
             @Override
             public void onRightCardExit(Object dataObject) {
                 final Animation shake = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.wobble);
-                if (flung) { yesButton.startAnimation(shake); }
+                if (flung) { nextButton.startAnimation(shake); }
                 flung = false;
             }
 
@@ -201,7 +209,7 @@ public class MatchActivity extends AppCompatActivity {
                 Log.d("onAdapterAboutToEmpty", Boolean.toString(userQueue.isEmpty()));
                 if (!userQueue.isEmpty()) {
                     Log.d("onAdapterAboutToEmpty", "poll");
-                    getPendingUserName(userQueue.poll());
+                    isPendingUserValid(userQueue.poll());
                 }
             }
 
@@ -217,8 +225,9 @@ public class MatchActivity extends AppCompatActivity {
             @Override
             public void onItemClicked(int position, Object dataObject) {
                 Intent intent = new Intent(MatchActivity.this, ProfileActivity.class);
-                intent.putExtra(PERSON_NAME, users.get(position).getUID());
-                startActivityForResult(intent, VIEW_PROFILE_REQUEST);
+                intent.putExtra("name", users.get(position).getName());
+                intent.putExtra("uid", users.get(position).getUID());
+                startActivity(intent);
                 overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
             }
         });
@@ -226,22 +235,11 @@ public class MatchActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        if (requestCode == VIEW_PROFILE_REQUEST) {
-            if (resultCode == ProfileActivity.RESULT_YES){
-                //swipe right
-                flingContainer.getTopCardListener().selectRight();
-            }
-            else if (resultCode == ProfileActivity.RESULT_NO ) {
-                //swipe left
-                flingContainer.getTopCardListener().selectLeft();
-            }
-        }
-        else if (requestCode == CREATE_PROFILE_REQUEST) {
+        if (requestCode == CREATE_PROFILE_REQUEST) {
             if (resultCode != RESULT_CANCELED) {
                 discoverable();
-                addTransition(noButton, 0);
-                addTransition(chatButton, 1);
-                addTransition(yesButton, 2);
+                addTransition(nextButton, 1);
+                addTransition(chatButton, 0);
             }
         }
     }
@@ -254,8 +252,7 @@ public class MatchActivity extends AppCompatActivity {
             public void onKeyEntered(String key, GeoLocation location) {
                 Log.d("key entered", key);
                 if (!key.equals(mUser.getUid())) {
-                    isPendingUserValid(key);
-                    potentialUserQueue.add(key);
+                    userQueue.add(new User(key));
                 }
             }
 
@@ -271,13 +268,11 @@ public class MatchActivity extends AppCompatActivity {
 
             @Override
             public void onGeoQueryReady() {
-                if (userQueue.isEmpty() && potentialUserQueue.isEmpty() && users.isEmpty()) {
-                    Log.d("userQueue", "isEmpty");
-                    showEmptyList(true);
+                if (!userQueue.isEmpty()) {
+                    isPendingUserValid(userQueue.poll());
                 }
-                else if (!userQueue.isEmpty()){
-                    Log.d("onGeoQueryReady", "poll");
-                    getPendingUserName(userQueue.poll());
+                else if (users.isEmpty()){
+                    showEmptyList(true);
                 }
 
             }
@@ -290,7 +285,6 @@ public class MatchActivity extends AppCompatActivity {
     }
 
     private void showEmptyList(boolean show) {
-        TextView emptyList = (TextView) findViewById(R.id.match_empty);
         showProgress(false);
         if (show && emptyList != null) {
             emptyList.setVisibility(View.VISIBLE);
@@ -300,23 +294,23 @@ public class MatchActivity extends AppCompatActivity {
         }
     }
 
-    private void isPendingUserValid(final String key) {
-        Query query = rootRef.child("users").child(key).child("buckits").orderByValue().limitToFirst(1).startAt(item);
+    private void isPendingUserValid(final User user) {
+        Query query = rootRef.child("users").child(user.getUID()).child("buckits").orderByKey().limitToFirst(1).startAt(item);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("isPendingUserValid", user.getUID());
                 //if its not null, then the user is valid
                 if (dataSnapshot.getValue() != null) {
                     Log.d(dataSnapshot.getKey(), dataSnapshot.getValue().toString());
-                    User pendingUser = new User();
-                    pendingUser.setUID(key);
-                    Log.d("pendingUser", "VALID");
-                    userQueue.add(pendingUser);
-                    if (users.isEmpty()) {
-                        getPendingUserName(userQueue.poll());
-                    }
+                    getPendingUserName(user);
                 }
-                potentialUserQueue.removeFirst();
+                else if (!userQueue.isEmpty()) {
+                    isPendingUserValid(userQueue.poll());
+                }
+                else if (users.isEmpty()){
+                    showEmptyList(true);
+                }
             }
 
             @Override
@@ -335,6 +329,12 @@ public class MatchActivity extends AppCompatActivity {
                     pendingUser.setName(dataSnapshot.getValue().toString());
                     getPendingUserAge(pendingUser);
                 }
+                else if (!userQueue.isEmpty()) {
+                    isPendingUserValid(userQueue.poll());
+                }
+                else if (users.isEmpty()){
+                    showEmptyList(true);
+                }
             }
 
             @Override
@@ -352,6 +352,12 @@ public class MatchActivity extends AppCompatActivity {
                 if (dataSnapshot.getValue() != null) {
                     pendingUser.setAge(Integer.parseInt(dataSnapshot.getValue().toString()));
                     getPendingUserPic(pendingUser);
+                }
+                else if (!userQueue.isEmpty()) {
+                    isPendingUserValid(userQueue.poll());
+                }
+                else if (users.isEmpty()){
+                    showEmptyList(true);
                 }
             }
 
@@ -374,6 +380,12 @@ public class MatchActivity extends AppCompatActivity {
                     showProgress(false);
                     showEmptyList(false);
                 }
+                else if (!userQueue.isEmpty()) {
+                    isPendingUserValid(userQueue.poll());
+                }
+                else if (users.isEmpty()){
+                    showEmptyList(true);
+                }
             }
 
             @Override
@@ -389,12 +401,11 @@ public class MatchActivity extends AppCompatActivity {
             geoQuery.removeAllListeners();
         showProgress(false);
         showEmptyList(false);
-        Button enable = (Button) findViewById(R.id.enable_discovery);
 
         if (enable != null) {
-            enable.setVisibility(View.INVISIBLE);
+            enable.setVisibility(View.GONE);
         }
-        if (yesButton != null && chatButton != null && noButton != null)
+        if (nextButton != null && chatButton != null)
             addExitTransitions();
         else
             super.onBackPressed();
@@ -405,9 +416,8 @@ public class MatchActivity extends AppCompatActivity {
         Animation animation2 = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.button_slide_down);
         Animation animation3 = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.button_slide_down);
 
-        yesButton.startAnimation(animation1);
+        nextButton.startAnimation(animation1);
         chatButton.startAnimation(animation2);
-        noButton.startAnimation(animation3);
 
         animation1.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -417,8 +427,7 @@ public class MatchActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                yesButton.setVisibility(View.INVISIBLE);
-                noButton.setVisibility(View.INVISIBLE);
+                nextButton.setVisibility(View.INVISIBLE);
                 chatButton.setVisibility(View.INVISIBLE);
                 MatchActivity.super.onBackPressed();
             }
@@ -432,11 +441,9 @@ public class MatchActivity extends AppCompatActivity {
     }
 
     private void initButtons() {
-        yesButton = (ImageButton) findViewById(R.id.yes_button);
-        noButton = (ImageButton) findViewById(R.id.no_button);
+        nextButton = (ImageButton) findViewById(R.id.next_button);
         chatButton = (ImageButton) findViewById(R.id.chat_button);
-        addAnimation(yesButton);
-        addAnimation(noButton);
+        addAnimation(nextButton);
         addAnimation(chatButton);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -446,9 +453,8 @@ public class MatchActivity extends AppCompatActivity {
                 public void onTransitionStart(Transition transition) {}
                 @Override
                 public void onTransitionEnd(Transition transition) {
-                    addTransition(noButton, 0);
-                    addTransition(chatButton, 1);
-                    addTransition(yesButton, 2);
+                    addTransition(nextButton, 1);
+                    addTransition(chatButton, 0);
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         sharedElementEnterTransition.removeListener(this);
@@ -463,8 +469,7 @@ public class MatchActivity extends AppCompatActivity {
             });
         }
         else {
-            yesButton.setVisibility(View.VISIBLE);
-            noButton.setVisibility(View.VISIBLE);
+            nextButton.setVisibility(View.VISIBLE);
             chatButton.setVisibility(View.VISIBLE);
         }
     }
@@ -502,17 +507,14 @@ public class MatchActivity extends AppCompatActivity {
     }
 
     private void handleButtonPress(ImageButton button) {
-        if (button == chatButton) {
+        if (button == chatButton && !users.isEmpty()) {
             Intent intent = new Intent(getApplicationContext(), ChatPage.class);
-            intent.putExtra(PERSON_NAME, users.get(flingContainer.getFirstVisiblePosition()).getName());
+            intent.putExtra("name", users.get(flingContainer.getFirstVisiblePosition()).getName());
             intent.putExtra("uid", users.get(flingContainer.getFirstVisiblePosition()).getUID());
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
         }
-        else if (button == yesButton && !users.isEmpty()) {
-            flingContainer.getTopCardListener().selectRight();
-        }
-        else if (button == noButton && !users.isEmpty()) {
+        else if (button == nextButton && !users.isEmpty()) {
             flingContainer.getTopCardListener().selectLeft();
         }
     }

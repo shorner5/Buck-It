@@ -43,8 +43,9 @@
                 <ImageView
                     android:layout_width="100dp"
                     android:layout_height="100dp"
-                    android:id="@+id/profile_imageView"
+                    android:id="@+id/profile_image"
                     android:layout_centerVertical="true"
+                    android:scaleType="fitCenter"
                     android:src="@drawable/ic_profile"
                     android:layout_margin="10dp"/>
 
@@ -52,10 +53,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:text="Stuart Horner"
                     android:id="@+id/profile_name"
-                    android:layout_toRightOf="@id/profile_imageView"
-                    android:layout_toEndOf="@+id/profile_imageView"
+                    android:layout_toRightOf="@id/profile_image"
+                    android:layout_toEndOf="@id/profile_image"
                     android:layout_centerVertical="true"
                     android:layout_alignParentBottom="false"
                     android:textSize="@dimen/abc_text_size_headline_material"
@@ -65,7 +65,7 @@
                     android:layout_width="wrap_content"
                     android:id="@+id/profile_subtitle"
                     android:layout_height="wrap_content"
-                    android:text="View my profile"
+                    android:text="@string/profile_view"
                     android:layout_below="@+id/profile_name"
                     android:layout_alignLeft="@+id/profile_name"
                     android:layout_alignStart="@+id/profile_name"

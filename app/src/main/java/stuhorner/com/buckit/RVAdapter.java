@@ -61,6 +61,12 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ItemsViewHolder>{
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
                 Checked check = Checked.newInstance(bucket_items.get(i), checked);
                 check.show(fm, "hello");
+                if (!completed) {
+                    itemViewHolder.checkBox.setChecked(false);
+                }
+                else {
+                    itemViewHolder.checkBox.setChecked(true);
+                }
             }
         });
 
