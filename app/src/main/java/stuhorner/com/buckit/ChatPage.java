@@ -158,6 +158,8 @@ public class ChatPage extends AppCompatActivity {
     }
 
     private void sendMessage(Message messageToSend) {
+        rootRef.child("users").child(UID).child("social").child(mUser.getUid()).setValue(0);
+        rootRef.child("users").child(mUser.getUid()).child("social").child(UID).setValue(0);
         rootRef.child("messages").child(mUser.getUid()).child(UID).child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
         rootRef.child("messages").child(UID).child(mUser.getUid()).child("metadata").child("last_message_time").setValue(ServerValue.TIMESTAMP);
         rootRef.child("messages").child(mUser.getUid()).child(UID).child("metadata").child("last_message").setValue(messageToSend);
@@ -180,7 +182,7 @@ public class ChatPage extends AppCompatActivity {
                 if (dataSnapshot.getValue() != null) {
                     byte[] bytes = Base64.decode(dataSnapshot.getValue().toString(), Base64.DEFAULT);
                     Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    item.setIcon(resizeImage(bitmap, 120, 120));
+                    item.setIcon(resizeImage(bitmap, 300, 300));
                 }
             }
 

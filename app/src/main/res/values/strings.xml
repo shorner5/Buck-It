@@ -14,14 +14,11 @@
     <string name="matched">MATCHED</string>
     <string name="social">FRIENDS</string>
     <string name="profile">PROFILE</string>
-    <string name="similar">SUGGESTED</string>
+    <string name="similar">NEAR ME</string>
     <string name="profile_edit">View my profile</string>
     <string name="checked_edit_text">Tap to add a story</string>
     <string name="checked_post">Post</string>
-    <plurals name="completed_text">
-        <item quantity="one">%1$s completed \"%3$s\"</item>
-        <item quantity="other"><b>%1$s</b> and <b>%2$s</b> completed \"%3$s\"</item>
-    </plurals>
+    <string name="completed_subtitle">%1$s completed \"%2$s\"</string>
     <string name="completed_title">COMPLETED</string>
     <string name="add_person">Add someone</string>
     <string name="add_confirm"><b>%1$s</b> is now on your Buck It List.</string>
@@ -69,5 +66,14 @@
 
     <string name="profile_view">View my profile</string>
     <string name="no_profile_text">I\'m new here</string>
+    <string name="no_data_social">No stories yet</string>
+    <string name="profile_none">No Profile</string>
+    <string name="create_profile">Tap to create one</string>
+    <string name="no_data_near_me">No one\'s near by right now</string>
+
+    <string name="edit">Edit</string>
+    <string name="change_pic">Upload a profile picture</string>
+    <string name="done">Done</string>
+    <string name="update_soon">Uploading&#8230;your profile picture will be updated soon</string>
 
 </resources>

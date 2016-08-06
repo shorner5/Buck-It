@@ -39,21 +39,20 @@ import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 import java.util.LinkedList;
 
 public class MatchActivity extends AppCompatActivity {
-    LinkedList<User> users = new LinkedList<>();
-    LinkedList<User> userQueue = new LinkedList<>();
+    private LinkedList<User> users = new LinkedList<>();
+    private LinkedList<User> userQueue = new LinkedList<>();
     private ImageButton nextButton;
     private ImageButton chatButton;
     private Button enable;
     private ImageView mProgressView;
-    TextView emptyList;
-    SwipeFlingAdapterView flingContainer;
-    CardAdapter adapter;
+    private TextView emptyList;
+    private SwipeFlingAdapterView flingContainer;
+    private CardAdapter adapter;
     boolean flung = false;
     private String item;
 
-    public final static String PERSON_NAME = "com.stuhorner.buckit.PERSON_NAME";
     public final static int CREATE_PROFILE_REQUEST = 0;
-    public final static int VIEW_PROFILE_REQUEST = 1;
+    public final static int RESULT_CHECKED = 1;
 
     //Firebase references
     DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
@@ -302,8 +301,45 @@ public class MatchActivity extends AppCompatActivity {
                 Log.d("isPendingUserValid", user.getUID());
                 //if its not null, then the user is valid
                 if (dataSnapshot.getValue() != null) {
-                    Log.d(dataSnapshot.getKey(), dataSnapshot.getValue().toString());
-                    getPendingUserName(user);
+                    boolean valid = false;
+                    for (DataSnapshot data : dataSnapshot.getChildren()) {
+                        if (data.getKey().equals(item)) {
+                            getPendingUserDiscoverable(user);
+                            valid = true;
+                        }
+                    }
+                    if (!valid) {
+                        if (!userQueue.isEmpty()) {
+                            isPendingUserValid(userQueue.poll());
+                        }
+                        else if (users.isEmpty()){
+                            showEmptyList(true);
+                        }
+                    }
+                }
+                else if (!userQueue.isEmpty()) {
+                    isPendingUserValid(userQueue.poll());
+                }
+                else if (users.isEmpty()){
+                    showEmptyList(true);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void getPendingUserDiscoverable(final User pendingUser) {
+        Log.d("path", "getPendingUserDiscoverable");
+        rootRef.child("users").child(pendingUser.getUID()).child("discoverable").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null && dataSnapshot.getValue().equals("1")) {
+                    pendingUser.setName(dataSnapshot.getValue().toString());
+                    getPendingUserName(pendingUser);
                 }
                 else if (!userQueue.isEmpty()) {
                     isPendingUserValid(userQueue.poll());
@@ -414,7 +450,6 @@ public class MatchActivity extends AppCompatActivity {
     private void addExitTransitions() {
         Animation animation1 = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.button_slide_down);
         Animation animation2 = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.button_slide_down);
-        Animation animation3 = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.button_slide_down);
 
         nextButton.startAnimation(animation1);
         chatButton.startAnimation(animation2);
@@ -508,6 +543,7 @@ public class MatchActivity extends AppCompatActivity {
 
     private void handleButtonPress(ImageButton button) {
         if (button == chatButton && !users.isEmpty()) {
+            flingContainer.getTopCardListener().selectLeft();
             Intent intent = new Intent(getApplicationContext(), ChatPage.class);
             intent.putExtra("name", users.get(flingContainer.getFirstVisiblePosition()).getName());
             intent.putExtra("uid", users.get(flingContainer.getFirstVisiblePosition()).getUID());
@@ -525,9 +561,10 @@ public class MatchActivity extends AppCompatActivity {
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    FragmentManager fm = getSupportFragmentManager();
-                    Checked check = Checked.newInstance(getIntent().getStringExtra(BuckitList.MATCH_ITEM), true);
-                    check.show(fm, "hello");
+                    Intent data = new Intent();
+                    data.putExtra(BuckitList.MATCH_ITEM, getIntent().getStringExtra(BuckitList.MATCH_ITEM));
+                    setResult(RESULT_CHECKED, data);
+                    finish();
                 }
             });
         }

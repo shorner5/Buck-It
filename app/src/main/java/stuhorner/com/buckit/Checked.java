@@ -2,7 +2,9 @@ package stuhorner.com.buckit;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -25,6 +27,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -39,19 +43,19 @@ import com.google.firebase.database.ValueEventListener;
  * Created by Stu on 12/14/2015.
  */
 public class Checked extends DialogFragment {
-    String match_item;
-    boolean checked;
-    EditText editText;
-    ImageButton addPhoto, share;
-    Button post, addPerson;
+    private String match_item;
+    private EditText editText;
+    private ImageButton addPhoto, share;
+    private Button post;
+    private TextView title;
+    private View view;
     private final static int GALLERY_REQUEST = 1;
+    private final static int PROFILE_CREATED_REQUEST = 2;
 
     //Firebase references
     private FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
     DatabaseReference socialRef = FirebaseDatabase.getInstance().getReference("social/" + mUser.getUid());
     DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users/" + mUser.getUid());
-    DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
-
 
     static Checked newInstance(String match_item, boolean checked){
         Checked c = new Checked();
@@ -63,31 +67,23 @@ public class Checked extends DialogFragment {
     }
 
     @Override
+    @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        View view = getActivity().getLayoutInflater().inflate(R.layout.checked, new LinearLayout(getActivity()), false);
+        view = getActivity().getLayoutInflater().inflate(R.layout.checked, new LinearLayout(getActivity()), false);
         this.match_item = getArguments().getString("title");
-        this.checked = getArguments().getBoolean("checked");
+        boolean checked = getArguments().getBoolean("checked");
         Dialog builder = new Dialog(getActivity());
+        builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        builder.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        builder.setContentView(view);
 
-        if (checked) {
-            builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            builder.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            builder.setContentView(view);
-
-            editText = (EditText) view.findViewById(R.id.checked_edit_text);
-            editText.setLines(10);
-            editText.setHorizontallyScrolling(false);
-            addPhoto = (ImageButton) view.findViewById(R.id.checked_photo);
-            post = (Button) view.findViewById(R.id.checked_post);
-            addPerson = (Button) view.findViewById(R.id.checked_subtitle);
-            share = (ImageButton) view.findViewById(R.id.checked_share);
-            handleButtons();
-            handleEditText();
-            addPerson.setText(getResources().getQuantityString(R.plurals.completed_text, 2, "Stu", "Kanye", match_item));
-
-            userRef.child("buckits").child(match_item).setValue(null);
-            userRef.child("completed").child(match_item).setValue(1);
-
+        SharedPreferences pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
+        if (!pref.getBoolean("profile_created", false)) {
+            Intent intent = new Intent(getActivity(), CreateProfileActivity.class);
+            startActivityForResult(intent, PROFILE_CREATED_REQUEST);
+        }
+        else if (checked) {
+            initDialog();
         }
         else {
             userRef.child("buckits").child(match_item).setValue(1);
@@ -97,8 +93,24 @@ public class Checked extends DialogFragment {
         return builder;
     }
 
-    private void handleEditText() {
+    private void initDialog() {
+        editText = (EditText) view.findViewById(R.id.checked_edit_text);
+        editText.setLines(10);
+        editText.setHorizontallyScrolling(false);
+        addPhoto = (ImageButton) view.findViewById(R.id.checked_photo);
+        post = (Button) view.findViewById(R.id.checked_post);
+        title = (TextView) view.findViewById(R.id.checked_subtitle);
+        share = (ImageButton) view.findViewById(R.id.checked_share);
+        handleButtons();
+        handleEditText();
+        getName();
 
+        userRef.child("buckits").child(match_item).setValue(null);
+        userRef.child("completed").child(match_item).setValue(1);
+
+    }
+
+    private void handleEditText() {
         editText.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
             }
@@ -140,34 +152,17 @@ public class Checked extends DialogFragment {
                 Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
                 sharingIntent.setType("text/plain");
                 sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getString(R.string.share_title));
-                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, String.format(getString(R.string.share_text), addPerson.getText().toString()));
+                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, String.format(getString(R.string.share_text), title.getText().toString()));
                 startActivity(Intent.createChooser(sharingIntent, "Share via"));
-            }
-        });
-        addPerson.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
             }
         });
     }
 
     private void post() {
-        socialRef.child(addPerson.getText().toString()).child("text").setValue(editText.getText().toString());
-        //todo: test this
-        userRef.child("matches").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    rootRef.child("users").child(data.getKey()).child("social").child(addPerson.getText().toString()).setValue(ServerValue.TIMESTAMP);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        socialRef.child(title.getText().toString()).child("story").setValue(editText.getText().toString());
+        socialRef.child(title.getText().toString()).child("time").setValue(ServerValue.TIMESTAMP);
+        socialRef.child(title.getText().toString()).child("likes").setValue(0);
+        socialRef.child(title.getText().toString()).child("likedBy").setValue(null);
         dismiss();
     }
 
@@ -209,9 +204,16 @@ public class Checked extends DialogFragment {
         if (requestCode == GALLERY_REQUEST && resultCode == Activity.RESULT_OK) {
             //upload image
             Uri selectedImage = data.getData();
-            BitmapUploadTask task = new BitmapUploadTask(getPathFromURI(selectedImage), "social/" + mUser.getUid() + "/" + addPerson.getText().toString() + "/img");
+            BitmapUploadTask task = new BitmapUploadTask(getPathFromURI(selectedImage), "social/" + mUser.getUid() + "/" + title.getText().toString() + "/img");
             task.execute();
             addPhoto.setColorFilter(getResources().getColor(R.color.accent_color_dark));
+        }
+        else if (requestCode == PROFILE_CREATED_REQUEST) {
+            if (resultCode != Activity.RESULT_CANCELED)
+                initDialog();
+            else {
+                dismiss();
+            }
         }
     }
 
@@ -229,6 +231,32 @@ public class Checked extends DialogFragment {
             if (cursor != null) {
                 cursor.close();
             }
+        }
+    }
+
+    private void getName() {
+        SharedPreferences pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
+        if (pref.getString("name", null) != null) {
+            title.setText(String.format(getString(R.string.completed_subtitle), pref.getString("name", null), match_item));
+        }
+        else {
+            userRef.child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.getValue() != null) {
+                        title.setText(String.format(getString(R.string.completed_subtitle), dataSnapshot.getValue().toString(), match_item));
+                        SharedPreferences.Editor editor = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE).edit();
+                        editor.putString("name", dataSnapshot.getValue().toString());
+                        editor.apply();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
         }
     }
 }

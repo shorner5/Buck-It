@@ -21,7 +21,7 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
             case 1:
                 return new ChatFragment();
             case 2:
-                return new MatchesFragment();
+                return new NearMeFragment();
             case 3:
                 return new Social();
             default:

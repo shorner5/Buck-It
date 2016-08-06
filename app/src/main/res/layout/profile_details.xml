@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@android:color/white">
@@ -13,24 +12,42 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/logo"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:scaleType="fitCenter"
-            android:src="@mipmap/ic_launcher"
-            android:layout_centerInParent="true" />
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:scaleType="fitCenter"
+                android:src="@mipmap/ic_launcher"
+                android:layout_centerInParent="true" />
 
-        <TextView
-            android:id="@+id/p_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:scrollbars="vertical"
-            android:paddingLeft="16dp"
-            android:paddingTop="16dp"
-            android:paddingRight="16dp"
-            android:paddingBottom="96dp"/>
+            <TextView
+                android:id="@+id/p_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:scrollbars="vertical"
+                android:paddingLeft="16dp"
+                android:paddingTop="16dp"
+                android:paddingRight="16dp"
+                android:paddingBottom="96dp"
+                android:layout_alignParentTop="true" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/p_edittext"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:paddingLeft="16dp"
+                android:paddingTop="16dp"
+                android:paddingRight="16dp"
+                android:paddingBottom="96dp"
+                android:imeOptions="actionDone"
+                android:gravity="top"
+                android:inputType="textCapSentences"
+                android:background="@android:color/transparent"
+                android:visibility="invisible"
+                android:layout_alignParentTop="true" />
+
         </RelativeLayout>
     </android.support.v4.widget.NestedScrollView>
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

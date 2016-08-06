@@ -1,10 +1,13 @@
 package stuhorner.com.buckit;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -39,6 +42,7 @@ import java.util.LinkedList;
  */
 public class BuckitList extends Fragment {
     public final static String MATCH_ITEM = "com.stuhorner.buckit.MATCH_ITEM";
+    private final static int MATCH_STARTED = 2;
     private LinkedList<String> bucket_items = new LinkedList<>();
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseUser mUser = mAuth.getCurrentUser();
@@ -84,7 +88,7 @@ public class BuckitList extends Fragment {
                 intent.putExtra(MATCH_ITEM, bucket_items.get(position));
                 Pair<View, String> p1 = Pair.create(v, "item_title");
                 ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(), p1);
-                getActivity().startActivity(intent, options.toBundle());
+                startActivityForResult(intent, MATCH_STARTED, options.toBundle());
             }
         });
 
@@ -236,6 +240,18 @@ public class BuckitList extends Fragment {
             Log.d("mProgressView", "invisible");
             mProgressView.setVisibility(View.INVISIBLE);
             mProgressView.clearAnimation();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == MATCH_STARTED) {
+            if (resultCode != Activity.RESULT_CANCELED) {
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                Checked check = Checked.newInstance(data.getStringExtra(BuckitList.MATCH_ITEM), true);
+                check.show(fm, "hello");
+            }
         }
     }
 }

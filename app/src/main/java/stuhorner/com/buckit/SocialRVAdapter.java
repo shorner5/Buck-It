@@ -12,35 +12,45 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.List;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+
+import java.util.LinkedList;
 
 /**
  * Created by Stu on 12/28/2015.
  */
-public class SocialRVAdapter  extends RecyclerView.Adapter<SocialRVAdapter.ItemsViewHolder> {
+public class SocialRVAdapter extends RecyclerView.Adapter<SocialRVAdapter.ItemsViewHolder> {
 
     public static class ItemsViewHolder extends RecyclerView.ViewHolder {
-        ImageView imageName;
-        TextView social_string;
+        ImageView img;
+        TextView title;
+        TextView story;
+        TextView numLikes;
         ImageButton likeButton;
-        ImageButton addButton;
 
         ItemsViewHolder(View itemView) {
             super(itemView);
-            imageName = (ImageView) itemView.findViewById(R.id.social_image);
-            social_string = (TextView) itemView.findViewById(R.id.social_string);
+            img = (ImageView) itemView.findViewById(R.id.img);
+            title = (TextView) itemView.findViewById(R.id.title);
+            story = (TextView) itemView.findViewById(R.id.story);
+            numLikes = (TextView) itemView.findViewById(R.id.like_number);
             likeButton = (ImageButton) itemView.findViewById(R.id.social_like);
-            addButton = (ImageButton) itemView.findViewById(R.id.social_add);
         }
     }
+    private DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+    private FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+    private LinkedList<SocialPostHolder> social_items;
+    private Context context;
 
-    List<String> social_string;
-    List<Integer> social_image;
-    Context context;
-
-    SocialRVAdapter(List<String> social_string, List<Integer> social_image, Context context) {
-        this.social_string = social_string;
-        this.social_image = social_image;
+    SocialRVAdapter(Context context, LinkedList<SocialPostHolder> social_items) {
+        this.social_items = social_items;
         this.context = context;
     }
 
@@ -57,35 +67,52 @@ public class SocialRVAdapter  extends RecyclerView.Adapter<SocialRVAdapter.Items
 
     @Override
     public void onBindViewHolder(ItemsViewHolder itemViewHolder, int i) {
-        itemViewHolder.social_string.setText(social_string.get(i));
-        itemViewHolder.imageName.setImageResource(social_image.get(i));
-        itemViewHolder.addButton.setColorFilter(context.getResources().getColor(R.color.text_light));
-        addAnimation(itemViewHolder.likeButton, itemViewHolder);
-        addAnimation(itemViewHolder.addButton, itemViewHolder);
-
+        itemViewHolder.title.setText(social_items.get(i).getTitle());
+        if (social_items.get(i).getImg() != null) {
+            itemViewHolder.img.setImageBitmap(social_items.get(i).getImg());
+        }
+        else {
+            itemViewHolder.img.setVisibility(View.GONE);
+        }
+        if (social_items.get(i).getStory() != null) {
+            itemViewHolder.story.setText(social_items.get(i).getStory());
+        }
+        else {
+            itemViewHolder.story.setVisibility(View.GONE);
+        }
+        if (social_items.get(i).isLiked()) {
+            itemViewHolder.likeButton.setImageResource(R.drawable.ic_liked);
+            itemViewHolder.likeButton.setColorFilter(context.getResources().getColor(R.color.accent_color_light));
+        }
+        else {
+            itemViewHolder.likeButton.setImageResource(R.drawable.ic_like);
+            itemViewHolder.likeButton.clearColorFilter();
+        }
+        itemViewHolder.numLikes.setText(String.valueOf(social_items.get(i).getLikes()));
+        addAnimation(itemViewHolder.likeButton, itemViewHolder, i);
     }
 
     @Override
     public int getItemCount() {
-        return social_string.size();
+        return social_items != null ? social_items.size() : 0;
     }
 
-    private void addAnimation(final ImageButton button, final ItemsViewHolder itemsViewHolder) {
-        final Animation scaleDownLike = AnimationUtils.loadAnimation(this.context, R.anim.scale_down);
-        scaleDownLike.setFillAfter(true);
-        final Animation scaleUpLike = AnimationUtils.loadAnimation(this.context, R.anim.scale_up);
-        scaleUpLike.setFillAfter(true);
+    private void addAnimation(final ImageButton button, final ItemsViewHolder itemsViewHolder, final int i) {
+        final Animation scaleDown = AnimationUtils.loadAnimation(this.context, R.anim.scale_down);
+        scaleDown.setFillAfter(true);
+        final Animation scaleUp = AnimationUtils.loadAnimation(this.context, R.anim.scale_up);
+        scaleUp.setFillAfter(true);
 
         button.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        button.startAnimation(scaleDownLike);
+                        button.startAnimation(scaleDown);
                         break;
                     case MotionEvent.ACTION_UP:
-                        button.startAnimation(scaleUpLike);
-                        handleButtonPress(button, itemsViewHolder);
+                        button.startAnimation(scaleUp);
+                        handleButtonPress(button, itemsViewHolder, i);
                         break;
                 }
                 return false;
@@ -93,14 +120,57 @@ public class SocialRVAdapter  extends RecyclerView.Adapter<SocialRVAdapter.Items
         });
     }
 
-    private void handleButtonPress(ImageButton button, ItemsViewHolder itemsViewHolder) {
+    private void handleButtonPress(ImageButton button, ItemsViewHolder itemsViewHolder, int i) {
         if (button == itemsViewHolder.likeButton) {
-            button.setImageResource(R.drawable.ic_liked);
-            button.setColorFilter(context.getResources().getColor(R.color.accent_color_light));
+            if (!social_items.get(i).isLiked()) {
+                social_items.get(i).setLiked(true);
+                rootRef.child("social").child(social_items.get(i).getUID()).child(social_items.get(i).getTitle()).child("likedBy").child(mUser.getUid()).setValue(1);
+                rootRef.child("social").child(social_items.get(i).getUID()).child(social_items.get(i).getTitle()).child("likes").runTransaction(new Transaction.Handler() {
+                    @Override
+                    public Transaction.Result doTransaction(MutableData mutableData) {
+                        if (mutableData != null) {
+                            if (mutableData.getValue() == null) {
+                                mutableData.setValue(1);
+                            } else {
+                                // Set value and report transaction success
+                                int num_users = mutableData.getValue(Integer.class);
+                                mutableData.setValue(++num_users);
+                            }
+                        }
+                        return Transaction.success(mutableData);
+                    }
 
-        } else if (button == itemsViewHolder.addButton) {
-            button.setColorFilter(context.getResources().getColor(R.color.accent_color_light));
+                    @Override
+                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                    }
+                });
+                social_items.get(i).incrementLikes();
+                this.notifyDataSetChanged();
+            } else {
+                rootRef.child("social").child(social_items.get(i).getUID()).child(social_items.get(i).getTitle()).child("likedBy").child(mUser.getUid()).setValue(null);
+                social_items.get(i).setLiked(false);
+                rootRef.child("social").child(social_items.get(i).getUID()).child(social_items.get(i).getTitle()).child("likes").runTransaction(new Transaction.Handler() {
+                    @Override
+                    public Transaction.Result doTransaction(MutableData mutableData) {
+                        if (mutableData != null) {
+                            if (mutableData.getValue() == null) {
+                                mutableData.setValue(1);
+                            } else {
+                                // Set value and report transaction success
+                                int num_users = mutableData.getValue(Integer.class);
+                                mutableData.setValue(--num_users);
+                            }
+                        }
+                        return Transaction.success(mutableData);
+                    }
 
+                    @Override
+                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                    }
+                });
+                social_items.get(i).decrementLikes();
+                this.notifyDataSetChanged();
+            }
         }
     }
 }

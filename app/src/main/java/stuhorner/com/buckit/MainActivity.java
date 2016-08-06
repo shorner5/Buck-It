@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
-
     }
 
     private void initTabs(final FloatingActionButton fab, final Toolbar toolbar) {
@@ -114,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
-        menu.getItem(0).getIcon().setColorFilter(getResources().getColor(R.color.accent_color_dark), PorterDuff.Mode.SRC_ATOP);
+        menu.getItem(0).getIcon().setColorFilter(getResources().getColor(android.R.color.darker_gray), PorterDuff.Mode.SRC_ATOP);
         return true;
     }
 

@@ -3,15 +3,18 @@ package stuhorner.com.buckit;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -22,7 +25,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -35,12 +37,14 @@ public class ProfileBuckits extends Fragment {
     private FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
     private ProfileBuckitsAdapter adapter;
     private ImageView mProgressView;
+    private TextView emptyList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View view = inflater.inflate(R.layout.profile_buckits, container, false);
         initRecyclerView(view);
         mProgressView = (ImageView) view.findViewById(R.id.logo);
+        emptyList = (TextView) view.findViewById(R.id.buckit_no_data);
         initData();
 
         return view;
@@ -70,13 +74,20 @@ public class ProfileBuckits extends Fragment {
         userRef.child(UID).child("buckits").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null) {
-                    for (DataSnapshot data : dataSnapshot.getChildren()) {
-                        bucket_items.add(data.getKey());
-                        adapter.notifyDataSetChanged();
+                if (isAdded()) {
+                    if (dataSnapshot.getValue() != null) {
+                        for (DataSnapshot data : dataSnapshot.getChildren()) {
+                            bucket_items.add(data.getKey());
+                            adapter.notifyDataSetChanged();
+                        }
+                        showProgress(false);
+                        showEmptyList(false);
+                    }
+                    else {
+                        showProgress(false);
+                        showEmptyList(true);
                     }
                 }
-                showProgress(false);
             }
 
             @Override
@@ -98,5 +109,12 @@ public class ProfileBuckits extends Fragment {
             mProgressView.setVisibility(View.INVISIBLE);
             mProgressView.clearAnimation();
         }
+    }
+
+    private void showEmptyList(boolean show) {
+        if (show)
+            emptyList.setVisibility(View.VISIBLE);
+        else
+            emptyList.setVisibility(View.GONE);
     }
 }

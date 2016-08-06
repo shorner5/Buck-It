@@ -1,60 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     card_view:cardUseCompatPadding="true"
     card_view:cardPreventCornerOverlap="false"
-    card_view:cardCornerRadius="0dp"
+    card_view:cardCornerRadius="2dp"
     android:foreground="?android:attr/selectableItemBackground"
-    card_view:cardBackgroundColor="@android:color/white"
-    >
+    card_view:cardBackgroundColor="@android:color/white">
 
-    <RelativeLayout
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView android:id="@+id/social_image"
-            android:layout_height="160dp"
-            android:maxHeight="160dp"
-            android:layout_width="fill_parent"
-            android:scaleType="centerCrop"/>
-
-        <TextView android:id="@+id/social_string"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/social_image"
-            android:gravity="center_vertical"
-            android:padding="15dp"
+            android:padding="16dp"
             android:textColor="@color/text"
             android:typeface="normal"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
-        <ImageButton
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:id="@+id/social_like"
-            android:src="@drawable/ic_like"
-            android:layout_below="@id/social_string"
-            android:layout_margin="5dp"
-            android:scaleType="fitCenter"
-            android:padding="0dp"
-            android:background="@color/primary_color"
-            />
+        <ImageView
+            android:id="@+id/img"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:scaleType="centerCrop"
+            android:minHeight="160dp"
+            android:contentDescription="@string/social" />
 
-        <ImageButton
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:id="@+id/social_add"
-            android:src="@drawable/ic_add"
-            android:layout_below="@id/social_string"
-            android:layout_toRightOf="@id/social_like"
-            android:layout_margin="5dp"
-            android:scaleType="fitCenter"
-            android:padding="0dp"
-            android:background="@color/primary_color"
-            />
-    </RelativeLayout>
+        <TextView
+            android:id="@+id/story"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textSize="18sp"
+            android:textColor="@color/text_light"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/social_like"
+                android:src="@drawable/ic_like"
+                android:layout_marginStart="8dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:scaleType="fitCenter"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
+                android:layout_marginLeft="8dp" />
+
+            <TextView
+                android:id="@+id/like_number"
+                android:layout_width="20dp"
+                android:layout_marginBottom="8dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_light"
+                android:textAppearance="?android:attr/textAppearance"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@+id/social_like"
+                android:layout_toRightOf="@+id/social_like" />
+
+        </RelativeLayout>
+    </LinearLayout>
 
 </android.support.v7.widget.CardView>

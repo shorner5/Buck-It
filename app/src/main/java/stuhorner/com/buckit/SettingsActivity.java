@@ -1,12 +1,11 @@
 package stuhorner.com.buckit;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -14,7 +13,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -31,8 +29,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
 import java.util.LinkedList;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -42,6 +38,7 @@ public class SettingsActivity extends AppCompatActivity {
     private DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users/" + mUser.getUid());
 
     private final static int PROFILE_DIMEN = 200;
+    private final static int CREATE_PROFILE_REQUEST = 3;
 
 
     @Override
@@ -50,7 +47,7 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.settings);
         initToolbar();
         initCompletedBuckits();
-        initProfile();
+        checkProfileCreated();
         initSearchSettings();
 
         Button logOut = (Button) findViewById(R.id.setting_logout);
@@ -68,9 +65,41 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    private void checkProfileCreated() {
+        final SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+        if (pref.getBoolean("profile_created", false)) {
+            initProfile();
+        }
+        else {
+            userRef.child("profile_created").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.getValue() != null && dataSnapshot.getValue().toString().equals("1")) {
+                        initProfile();
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putBoolean("profile_created", true);
+                        editor.apply();
+                    }
+                    else {
+                        initNoProfile();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
     private void initProfile() {
         final ImageView profilePic = (ImageView) findViewById(R.id.profile_image);
         final TextView name = (TextView) findViewById(R.id.profile_name);
+        TextView subtitle = (TextView) findViewById(R.id.profile_subtitle);
+        if (subtitle != null) {
+            subtitle.setText(getString(R.string.profile_view));
+        }
         CardView profile = (CardView) findViewById(R.id.profile_view);
         if (profile != null) {
             profile.setOnClickListener(new View.OnClickListener() {
@@ -83,18 +112,33 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             });
         }
-        userRef.child("name").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null && name != null) {
-                    name.setText(dataSnapshot.getValue().toString());
-                }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
+        //get name
+        SharedPreferences pref = getSharedPreferences("data", Context.MODE_PRIVATE);
+        if (pref.getString("name", null) != null && name != null) {
+            name.setText(pref.getString("name", null));
+        }
+        else if (name != null){
+            userRef.child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.getValue() != null) {
+                        name.setText(dataSnapshot.getValue().toString());
+                        SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+                        editor.putString("name", dataSnapshot.getValue().toString());
+                        editor.apply();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+        }
+
+        //get profile picture
         userRef.child("profilePicSmall").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -109,6 +153,27 @@ public class SettingsActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
+    }
+
+    private void initNoProfile() {
+        TextView name = (TextView) findViewById(R.id.profile_name);
+        TextView subtitle = (TextView) findViewById(R.id.profile_subtitle);
+        CardView cardView = (CardView) findViewById(R.id.profile_view);
+        if (name != null) {
+            name.setText(getString(R.string.profile_none));
+        }
+        if (subtitle != null) {
+            subtitle.setText(getString(R.string.create_profile));
+        }
+        if (cardView != null) {
+            cardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(SettingsActivity.this, CreateProfileActivity.class);
+                    startActivityForResult(intent, CREATE_PROFILE_REQUEST);
+                }
+            });
+        }
     }
 
     private Bitmap resizeImage(Bitmap bitmap, int w, int h)
@@ -162,6 +227,15 @@ public class SettingsActivity extends AppCompatActivity {
         if (requestCode == MatchActivity.CREATE_PROFILE_REQUEST) {
             if (resultCode != RESULT_CANCELED) {
                 setDiscoverable();
+                initProfile();
+            }
+        }
+        else if (requestCode == CREATE_PROFILE_REQUEST) {
+            if (resultCode != RESULT_CANCELED) {
+                initProfile();
+            }
+            else {
+                initNoProfile();
             }
         }
     }

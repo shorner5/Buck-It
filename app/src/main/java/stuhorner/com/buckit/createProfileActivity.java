@@ -220,6 +220,9 @@ public class CreateProfileActivity extends AppCompatActivity {
 
     private void setName(String name) {
         userRef.child("name").setValue(name);
+        SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+        editor.putString("name", name);
+        editor.apply();
     }
 
     private void setAge(int age) {
