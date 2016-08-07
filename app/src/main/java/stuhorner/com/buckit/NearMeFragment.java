@@ -33,14 +33,14 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 public class NearMeFragment extends Fragment implements LocationReceiver {
-    ImageView mProgressView;
-    TextView emptyList;
+    private ImageView mProgressView;
+    private TextView emptyList;
     private Button button;
-    NearMeAdapter adapter;
-    LinkedList<NearMeHolder> users = new LinkedList<>();
-    HashSet<String> userQueue = new HashSet<>();
+    private NearMeAdapter adapter;
+    private LinkedList<NearMeHolder> users = new LinkedList<>();
+    private HashSet<String> userQueue = new HashSet<>();
     private DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
-    GeoFire geoFire = new GeoFire(rootRef.child("geoFire"));
+    private GeoFire geoFire = new GeoFire(rootRef.child("geoFire"));
     private FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
 
     @Override

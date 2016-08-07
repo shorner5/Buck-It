@@ -3,6 +3,7 @@ package stuhorner.com.buckit;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
+import android.util.Log;
 
 /**
  * Created by Stu on 8/4/2016.
@@ -11,6 +12,7 @@ public class SocialPostHolder {
     private String title;
     private String story;
     private Bitmap img;
+    private String imgAsBase64;
     private int likes = 0;
     private long time;
     private String UID;
@@ -33,6 +35,7 @@ public class SocialPostHolder {
     }
 
     public void setImg(String img) {
+        setImgAsBase64(img);
         BitmapFactory.Options options = new BitmapFactory.Options();
         byte[] bytes = Base64.decode(img.getBytes(), Base64.DEFAULT);
         this.img = BitmapFactory.decodeByteArray(bytes,0, bytes.length, options);
@@ -84,5 +87,13 @@ public class SocialPostHolder {
 
     public void setLiked(boolean liked) {
         this.liked = liked;
+    }
+
+    public String getImgAsBase64() {
+        return imgAsBase64;
+    }
+
+    public void setImgAsBase64(String imgAsBase64) {
+        this.imgAsBase64 = imgAsBase64;
     }
 }

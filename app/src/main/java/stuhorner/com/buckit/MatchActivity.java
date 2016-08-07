@@ -72,7 +72,6 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
 
     public final static int CREATE_PROFILE_REQUEST = 0;
     public final static int RESULT_CHECKED = 1;
-
     private final static int REQUEST_CHECK_SETTINGS = 3;
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;

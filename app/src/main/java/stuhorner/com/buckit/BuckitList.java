@@ -36,6 +36,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by Stu on 12/14/2015.
@@ -245,6 +246,7 @@ public class BuckitList extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
+        Log.d("buckitList", "onActivityResult");
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MATCH_STARTED) {
             if (resultCode != Activity.RESULT_CANCELED) {

@@ -1,7 +1,11 @@
 package stuhorner.com.buckit;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -47,11 +51,11 @@ public class SocialRVAdapter extends RecyclerView.Adapter<SocialRVAdapter.ItemsV
     private DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
     private FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
     private LinkedList<SocialPostHolder> social_items;
-    private Context context;
+    private Activity activity;
 
-    SocialRVAdapter(Context context, LinkedList<SocialPostHolder> social_items) {
+    SocialRVAdapter(Activity activity, LinkedList<SocialPostHolder> social_items) {
         this.social_items = social_items;
-        this.context = context;
+        this.activity = activity;
     }
 
     @Override
@@ -66,10 +70,18 @@ public class SocialRVAdapter extends RecyclerView.Adapter<SocialRVAdapter.ItemsV
     }
 
     @Override
-    public void onBindViewHolder(ItemsViewHolder itemViewHolder, int i) {
+    public void onBindViewHolder(final ItemsViewHolder itemViewHolder, final int i) {
         itemViewHolder.title.setText(social_items.get(i).getTitle());
         if (social_items.get(i).getImg() != null) {
+            Log.d("displaying image", itemViewHolder.title.getText().toString());
             itemViewHolder.img.setImageBitmap(social_items.get(i).getImg());
+            itemViewHolder.img.setVisibility(View.VISIBLE);
+            itemViewHolder.img.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    displayImage(itemViewHolder.getAdapterPosition(), itemViewHolder.img);
+                }
+            });
         }
         else {
             itemViewHolder.img.setVisibility(View.GONE);
@@ -82,7 +94,7 @@ public class SocialRVAdapter extends RecyclerView.Adapter<SocialRVAdapter.ItemsV
         }
         if (social_items.get(i).isLiked()) {
             itemViewHolder.likeButton.setImageResource(R.drawable.ic_liked);
-            itemViewHolder.likeButton.setColorFilter(context.getResources().getColor(R.color.accent_color_light));
+            itemViewHolder.likeButton.setColorFilter(activity.getResources().getColor(R.color.accent_color_light));
         }
         else {
             itemViewHolder.likeButton.setImageResource(R.drawable.ic_like);
@@ -90,6 +102,15 @@ public class SocialRVAdapter extends RecyclerView.Adapter<SocialRVAdapter.ItemsV
         }
         itemViewHolder.numLikes.setText(String.valueOf(social_items.get(i).getLikes()));
         addAnimation(itemViewHolder.likeButton, itemViewHolder, i);
+        itemViewHolder.title.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(activity, ProfileActivity.class);
+                intent.putExtra("uid", social_items.get(itemViewHolder.getAdapterPosition()).getUID());
+                activity.startActivity(intent);
+                activity.overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
+            }
+        });
     }
 
     @Override
@@ -98,9 +119,9 @@ public class SocialRVAdapter extends RecyclerView.Adapter<SocialRVAdapter.ItemsV
     }
 
     private void addAnimation(final ImageButton button, final ItemsViewHolder itemsViewHolder, final int i) {
-        final Animation scaleDown = AnimationUtils.loadAnimation(this.context, R.anim.scale_down);
+        final Animation scaleDown = AnimationUtils.loadAnimation(this.activity, R.anim.scale_down);
         scaleDown.setFillAfter(true);
-        final Animation scaleUp = AnimationUtils.loadAnimation(this.context, R.anim.scale_up);
+        final Animation scaleUp = AnimationUtils.loadAnimation(this.activity, R.anim.scale_up);
         scaleUp.setFillAfter(true);
 
         button.setOnTouchListener(new View.OnTouchListener() {
@@ -120,7 +141,7 @@ public class SocialRVAdapter extends RecyclerView.Adapter<SocialRVAdapter.ItemsV
         });
     }
 
-    private void handleButtonPress(ImageButton button, ItemsViewHolder itemsViewHolder, int i) {
+    private void handleButtonPress(View button, ItemsViewHolder itemsViewHolder, int i) {
         if (button == itemsViewHolder.likeButton) {
             if (!social_items.get(i).isLiked()) {
                 social_items.get(i).setLiked(true);
@@ -172,5 +193,12 @@ public class SocialRVAdapter extends RecyclerView.Adapter<SocialRVAdapter.ItemsV
                 this.notifyDataSetChanged();
             }
         }
+    }
+
+    private void displayImage(int position, ImageView imageView) {
+        Intent intent = new Intent(activity, DisplayImageActivity.class);
+        intent.putExtra("image", social_items.get(position).getImgAsBase64());
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, imageView , "img");
+        activity.startActivity(intent, options.toBundle());
     }
 }

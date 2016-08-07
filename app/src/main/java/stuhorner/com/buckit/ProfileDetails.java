@@ -51,7 +51,7 @@ public class ProfileDetails extends Fragment {
     }
     private void initData(){
         showProgress(true);
-        userRef.child(mUser.getUid()).child("profileText").addListenerForSingleValueEvent(new ValueEventListener() {
+        userRef.child(getActivity().getIntent().getStringExtra("uid")).child("profileText").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (isAdded()) {
@@ -73,7 +73,7 @@ public class ProfileDetails extends Fragment {
     }
 
     private void initEditText() {
-        editText.setLines(10);
+        editText.setLines(30);
         editText.setHorizontallyScrolling(false);
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override

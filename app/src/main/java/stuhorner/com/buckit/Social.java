@@ -112,6 +112,7 @@ public class Social extends Fragment {
                         }
                     });
                     adapter.notifyDataSetChanged();
+                    Log.d("adapter", "notified datasetchanged");
                     showEmptyList(false);
                 }
                 else {
