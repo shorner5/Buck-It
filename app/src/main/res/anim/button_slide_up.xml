@@ -3,7 +3,7 @@
 	android:interpolator="@android:anim/overshoot_interpolator"
 
     >
-    <translate android:fromYDelta="200%"
+    <translate android:fromYDelta="100%"
         android:toYDelta="0%"
         android:duration="@string/animTime"/>
 </set>

@@ -51,11 +51,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
+
+import java.util.HashSet;
 import java.util.LinkedList;
 
 public class MatchActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private LinkedList<User> users = new LinkedList<>();
     private LinkedList<User> userQueue = new LinkedList<>();
+    private HashSet<String> loadingQueue = new HashSet<>();
     private ImageButton nextButton;
     private ImageButton chatButton;
     private Button enable, enable_location;
@@ -63,8 +66,9 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
     private TextView emptyList;
     private SwipeFlingAdapterView flingContainer;
     private CardAdapter adapter;
-    boolean flung = false;
+    private boolean flung;
     private String item;
+
 
     public final static int CREATE_PROFILE_REQUEST = 0;
     public final static int RESULT_CHECKED = 1;
@@ -198,10 +202,10 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
             @Override
             public void removeFirstObjectInAdapter() {
                 users.remove(0);
-                if (userQueue.isEmpty() && users.isEmpty()) {
+                if (userQueue.isEmpty() && users.isEmpty() && loadingQueue.isEmpty()) {
                     showEmptyList(true);
                 }
-                else if (!userQueue.isEmpty() && users.isEmpty()){
+                else if ((!userQueue.isEmpty() || !loadingQueue.isEmpty()) && users.isEmpty()){
                     showProgress(true);
                 }
                 adapter.notifyDataSetChanged();
@@ -264,6 +268,7 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
             switch (resultCode) {
                 case Activity.RESULT_OK:
                     Log.d("location", "onActivityResultOK");
+                    showProgress(true);
                     queryLocation();
                     break;
                 case Activity.RESULT_CANCELED:
@@ -284,6 +289,7 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
                 Log.d("key entered", key);
                 if (!key.equals(mUser.getUid())) {
                     userQueue.add(new User(key));
+                    loadingQueue.add(key);
                 }
             }
 
@@ -341,19 +347,22 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
                         }
                     }
                     if (!valid) {
+                        loadingQueue.remove(user.getUID());
                         if (!userQueue.isEmpty()) {
                             isPendingUserValid(userQueue.poll());
                         }
-                        else if (users.isEmpty()){
+                        else if (users.isEmpty() && loadingQueue.isEmpty()){
                             showEmptyList(true);
                         }
                     }
                 }
-                else if (!userQueue.isEmpty()) {
-                    isPendingUserValid(userQueue.poll());
-                }
-                else if (users.isEmpty()){
-                    showEmptyList(true);
+                else {
+                    loadingQueue.remove(user.getUID());
+                    if (!userQueue.isEmpty()) {
+                        isPendingUserValid(userQueue.poll());
+                    } else if (users.isEmpty() && loadingQueue.isEmpty()) {
+                        showEmptyList(true);
+                    }
                 }
             }
 
@@ -373,11 +382,15 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
                     pendingUser.setName(dataSnapshot.getValue().toString());
                     getPendingUserName(pendingUser);
                 }
-                else if (!userQueue.isEmpty()) {
-                    isPendingUserValid(userQueue.poll());
-                }
-                else if (users.isEmpty()){
-                    showEmptyList(true);
+
+                else {
+                    loadingQueue.remove(pendingUser.getUID());
+                    if (!userQueue.isEmpty()) {
+                        isPendingUserValid(userQueue.poll());
+                    }
+                    else if (users.isEmpty() && loadingQueue.isEmpty()){
+                        showEmptyList(true);
+                    }
                 }
             }
 
@@ -397,11 +410,14 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
                     pendingUser.setName(dataSnapshot.getValue().toString());
                     getPendingUserAge(pendingUser);
                 }
-                else if (!userQueue.isEmpty()) {
-                    isPendingUserValid(userQueue.poll());
-                }
-                else if (users.isEmpty()){
-                    showEmptyList(true);
+                else {
+                    loadingQueue.remove(pendingUser.getUID());
+                    if (!userQueue.isEmpty()) {
+                        isPendingUserValid(userQueue.poll());
+                    }
+                    else if (users.isEmpty() && loadingQueue.isEmpty()){
+                        showEmptyList(true);
+                    }
                 }
             }
 
@@ -421,11 +437,14 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
                     pendingUser.setAge(Integer.parseInt(dataSnapshot.getValue().toString()));
                     getPendingUserPic(pendingUser);
                 }
-                else if (!userQueue.isEmpty()) {
-                    isPendingUserValid(userQueue.poll());
-                }
-                else if (users.isEmpty()){
-                    showEmptyList(true);
+                else {
+                    loadingQueue.remove(pendingUser.getUID());
+                    if (!userQueue.isEmpty()) {
+                        isPendingUserValid(userQueue.poll());
+                    }
+                    else if (users.isEmpty() && loadingQueue.isEmpty()){
+                        showEmptyList(true);
+                    }
                 }
             }
 
@@ -447,12 +466,16 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
                     adapter.notifyDataSetChanged();
                     showProgress(false);
                     showEmptyList(false);
+                    loadingQueue.remove(pendingUser.getUID());
                 }
-                else if (!userQueue.isEmpty()) {
-                    isPendingUserValid(userQueue.poll());
-                }
-                else if (users.isEmpty()){
-                    showEmptyList(true);
+                else {
+                    loadingQueue.remove(pendingUser.getUID());
+                    if (!userQueue.isEmpty()) {
+                        isPendingUserValid(userQueue.poll());
+                    }
+                    else if (users.isEmpty() && loadingQueue.isEmpty()){
+                        showEmptyList(true);
+                    }
                 }
             }
 
