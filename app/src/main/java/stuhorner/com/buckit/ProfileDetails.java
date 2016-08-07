@@ -51,7 +51,7 @@ public class ProfileDetails extends Fragment {
     }
     private void initData(){
         showProgress(true);
-        userRef.child("profileText").addListenerForSingleValueEvent(new ValueEventListener() {
+        userRef.child(mUser.getUid()).child("profileText").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (isAdded()) {

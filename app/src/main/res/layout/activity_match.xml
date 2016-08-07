@@ -65,32 +65,40 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <com.lorentzos.flingswipe.SwipeFlingAdapterView
-            android:id="@+id/swipecards"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            app:rotation_degrees="16"
-            app:max_visible="4"
-            app:min_adapter_stack="6"/>
+            <com.lorentzos.flingswipe.SwipeFlingAdapterView
+                android:id="@+id/swipecards"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                app:rotation_degrees="16"
+                app:max_visible="4"
+                app:min_adapter_stack="6"/>
 
-        <ImageView
-            android:id="@+id/match_logo"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:scaleType="fitCenter"
-            android:src="@mipmap/ic_launcher"
-            android:layout_centerInParent="true"
-            android:visibility="invisible"
-            />
+            <ImageView
+                android:id="@+id/match_logo"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:scaleType="fitCenter"
+                android:src="@mipmap/ic_launcher"
+                android:layout_centerInParent="true"
+                android:visibility="invisible"/>
 
-        <TextView
-            android:id="@+id/match_empty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/match_empty"
-            android:layout_centerInParent="true"
-            android:visibility="gone"
-            />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/enable_location"
+                android:text="@string/enable_location"
+                android:visibility="gone"
+                style="@style/Base.Widget.AppCompat.Button.Colored"
+                android:padding="8dp"
+                android:layout_centerInParent="true"/>
+
+            <TextView
+                android:id="@+id/match_empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/match_empty"
+                android:layout_centerInParent="true"
+                android:visibility="gone"/>
 
             <Button
                 android:id="@+id/enable_discovery"
@@ -100,8 +108,7 @@
                 style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_centerInParent="true"
                 android:visibility="gone"
-                android:transitionName="button"
-                />
+                android:transitionName="button" />
 
             <LinearLayout
                 android:layout_width="match_parent"

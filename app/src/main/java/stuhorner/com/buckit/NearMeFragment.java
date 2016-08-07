@@ -1,6 +1,7 @@
 package stuhorner.com.buckit;
 
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -30,9 +32,10 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-public class NearMeFragment extends Fragment {
+public class NearMeFragment extends Fragment implements LocationReceiver {
     ImageView mProgressView;
     TextView emptyList;
+    private Button button;
     NearMeAdapter adapter;
     LinkedList<NearMeHolder> users = new LinkedList<>();
     HashSet<String> userQueue = new HashSet<>();
@@ -43,14 +46,17 @@ public class NearMeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_near_me, container, false);
+        button = (Button) v.findViewById(R.id.enable_location);
         initRecyclerView(v);
-        initData();
-
+        ((MainActivity)getActivity()).startLocationQuery(this);
         return v;
     }
 
-    private void initData() {
-        GeoQuery query = geoFire.queryAtLocation(new GeoLocation(37.7832, -122.4056), 220);
+    @Override
+    public void initData(Location location) {
+        Log.d("location", "initData");
+        geoFire.setLocation(mUser.getUid(), new GeoLocation(location.getLatitude(), location.getLongitude()));
+        GeoQuery query = geoFire.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), 220);
         query.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
@@ -219,4 +225,26 @@ public class NearMeFragment extends Fragment {
             }
         });
     }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        ((MainActivity)getActivity()).disconnectGoogleApiClient();
+    }
+
+    @Override
+    public void permissionDenied() {
+        showProgress(false);
+        button.setVisibility(View.VISIBLE);
+        ((MainActivity)getActivity()).disconnectGoogleApiClient();
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                button.setVisibility(View.GONE);
+                ((MainActivity)getActivity()).startLocationQuery(NearMeFragment.this);
+                showProgress(true);
+            }
+        });
+    }
+
 }

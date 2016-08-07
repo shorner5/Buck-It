@@ -60,6 +60,7 @@
     <string name="age">What\'s your age?</string>
     <string name="pic">Add a picture</string>
     <string name="permission_denied">Buck It needs to be able to access storage to upload a profile picture</string>
+    <string name="permission_denied_location">Buck It needs to be able to access location to show you people near you</string>
     <string name="age_minimum">You must be at least 18</string>
     <string name="share_text"><b>%1$s</b> on Buck It. Download it today: https://arteryapp.com</string>
     <string name="share_title">I Checked Something off my Buck It List</string>
@@ -75,5 +76,6 @@
     <string name="change_pic">Upload a profile picture</string>
     <string name="done">Done</string>
     <string name="update_soon">Uploading&#8230;your profile picture will be updated soon</string>
+    <string name="enable_location">Enable location</string>
 
 </resources>

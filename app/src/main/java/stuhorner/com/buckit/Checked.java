@@ -174,7 +174,7 @@ public class Checked extends DialogFragment {
                 return true;
             } else {
                 Log.v("storage","Permission is revoked");
-                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, GALLERY_REQUEST);
+                requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, GALLERY_REQUEST);
                 return false;
             }
         }

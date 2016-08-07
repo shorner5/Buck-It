@@ -83,7 +83,7 @@ public class BuckitList extends Fragment {
         ItemClickSupport.addTo(rv).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
             @Override
             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                //transition to match activity
+                //transition to activity_match activity
                 Intent intent = new Intent(getActivity(), MatchActivity.class);
                 intent.putExtra(MATCH_ITEM, bucket_items.get(position));
                 Pair<View, String> p1 = Pair.create(v, "item_title");

@@ -1,12 +1,16 @@
 package stuhorner.com.buckit;
 
+import android.app.Activity;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.util.Pair;
 import android.transition.Transition;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -26,6 +30,18 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -33,17 +49,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 import java.util.LinkedList;
 
-public class MatchActivity extends AppCompatActivity {
+public class MatchActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private LinkedList<User> users = new LinkedList<>();
     private LinkedList<User> userQueue = new LinkedList<>();
     private ImageButton nextButton;
     private ImageButton chatButton;
-    private Button enable;
+    private Button enable, enable_location;
     private ImageView mProgressView;
     private TextView emptyList;
     private SwipeFlingAdapterView flingContainer;
@@ -54,17 +69,23 @@ public class MatchActivity extends AppCompatActivity {
     public final static int CREATE_PROFILE_REQUEST = 0;
     public final static int RESULT_CHECKED = 1;
 
+    private final static int REQUEST_CHECK_SETTINGS = 3;
+    private GoogleApiClient googleApiClient;
+    private LocationRequest locationRequest;
+
     //Firebase references
-    DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
-    DatabaseReference geoRef = FirebaseDatabase.getInstance().getReference("geoFire");
-    GeoFire geoFire = new GeoFire(geoRef);
-    GeoQuery geoQuery;
+    private DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+    private DatabaseReference geoRef = FirebaseDatabase.getInstance().getReference("geoFire");
+    private GeoFire geoFire = new GeoFire(geoRef);
+    private GeoQuery geoQuery;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseUser mUser = mAuth.getCurrentUser();
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.match);
+        setContentView(R.layout.activity_match);
+
+        googleApiClient = new GoogleApiClient.Builder(getApplicationContext(), this, this).addApi(LocationServices.API).build();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -80,6 +101,7 @@ public class MatchActivity extends AppCompatActivity {
         checkboxListener();
 
         enable = (Button) findViewById(R.id.enable_discovery);
+        enable_location = (Button) findViewById(R.id.enable_location);
         mProgressView = (ImageView) findViewById(R.id.match_logo);
         emptyList = (TextView) findViewById(R.id.match_empty);
         TextView textView = (TextView) findViewById(R.id.match_text);
@@ -94,7 +116,6 @@ public class MatchActivity extends AppCompatActivity {
         else {
             discoverable();
         }
-
     }
 
     private void discoverable() {
@@ -104,8 +125,8 @@ public class MatchActivity extends AppCompatActivity {
         }
 
         initButtons();
-        initData();
         initFlingContainer();
+        googleApiClient.connect();
 
         rootRef.child("users").child(mUser.getUid()).child("discoverable").setValue("1");
         SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
@@ -162,9 +183,7 @@ public class MatchActivity extends AppCompatActivity {
 
     private void createProfile() {
         Intent intent = new Intent(MatchActivity.this, CreateProfileActivity.class);
-        Pair<View, String> p3 = Pair.create((View) enable, "button");
-
-        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this, p3);
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this, enable, "button");
         startActivityForResult(intent,CREATE_PROFILE_REQUEST, options.toBundle());
     }
 
@@ -241,11 +260,24 @@ public class MatchActivity extends AppCompatActivity {
                 addTransition(chatButton, 0);
             }
         }
+        else if (requestCode == REQUEST_CHECK_SETTINGS) {
+            switch (resultCode) {
+                case Activity.RESULT_OK:
+                    Log.d("location", "onActivityResultOK");
+                    queryLocation();
+                    break;
+                case Activity.RESULT_CANCELED:
+                    Log.d("location", "onActivityResultCANCELED");
+                    onPermissionDenied();
+                    break;
+            }
+        }
     }
 
-    private void initData(){
+    public void initData(Location location){
         showProgress(true);
-        geoQuery = geoFire.queryAtLocation(new GeoLocation(37.7832, -122.4056), 220);
+        geoFire.setLocation(mUser.getUid(), new GeoLocation(location.getLatitude(), location.getLongitude()));
+        geoQuery = geoFire.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), 220);
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
@@ -582,5 +614,151 @@ public class MatchActivity extends AppCompatActivity {
             mProgressView.setVisibility(View.GONE);
             mProgressView.clearAnimation();
         }
+    }
+
+    @Override
+    public void onStop() {
+        if (googleApiClient != null) {
+            googleApiClient.disconnect();
+        }
+        super.onStop();
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.d("location", "onConnected");
+        if (isLocationPermissionGranted())  {
+            try {
+                Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+                if (lastLocation != null) {
+                    Log.d("location", lastLocation.toString());
+                    initData(lastLocation);
+                }
+                else {
+                    settingsRequest();
+                }
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult c) {
+        Log.d("location", "onConnectionFailed");
+    }
+
+    @Override
+    public void onConnectionSuspended(int c) {
+    }
+
+    public void settingsRequest() {
+        locationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
+                .setNumUpdates(1)
+                .setInterval(0)
+                .setExpirationDuration(60 * 1000);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
+        builder.setAlwaysShow(true);
+
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(@NonNull LocationSettingsResult result) {
+                final Status status = result.getStatus();
+                final LocationSettingsStates state = result.getLocationSettingsStates();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        Log.d("location", "success");
+                        queryLocation();
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied. But could be fixed by showing the user
+                        // a dialog.
+                        Log.d("location", "dialog");
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(MatchActivity.this, REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                            // Ignore the error.
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way to fix the
+                        // settings so we won't show the dialog.
+                        Log.d("location", "nope");
+                        break;
+                }
+            }
+        });
+    }
+
+    private void queryLocation() {
+        Log.d("location", "getLocation");
+        try {
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    Log.d("location", location.toString());
+                    initData(location);
+                }
+            });
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public  boolean isLocationPermissionGranted() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v("location","Permission is granted");
+                return true;
+            } else {
+                Log.v("location","Permission is revoked");
+                requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CHECK_SETTINGS);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v("location","Permission is granted");
+            return true;
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        Log.d("location", "onRequestPermissionsResult");
+        switch (requestCode) {
+            case REQUEST_CHECK_SETTINGS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //on connected
+                    Log.d("location", "permission granted");
+                    settingsRequest();
+
+                } else {
+                    Snackbar.make(getWindow().getDecorView(), getString(R.string.permission_denied_location), Snackbar.LENGTH_LONG).show();
+                    onPermissionDenied();
+                }
+            }
+        }
+    }
+
+    private void onPermissionDenied() {
+        showProgress(false);
+        enable_location.setVisibility(View.VISIBLE);
+        googleApiClient.disconnect();
+        enable_location.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                enable_location.setVisibility(View.GONE);
+                googleApiClient.connect();
+                showProgress(true);
+            }
+        });
     }
 }
