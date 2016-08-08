@@ -141,7 +141,7 @@ public class NearMeFragment extends Fragment implements LocationReceiver {
     }
 
     private void getBuckitList(final NearMeHolder user) {
-        Query query = rootRef.child("users").child(user.getUid()).child("buckits").limitToFirst(2);
+        Query query = rootRef.child("users").child(user.getUid()).child("buckits").orderByKey().limitToFirst(2);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

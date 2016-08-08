@@ -49,9 +49,13 @@ public class InspireRVAdapter  extends RecyclerView.Adapter<InspireRVAdapter.Ite
     @Override
     public void onBindViewHolder(ItemsViewHolder itemViewHolder, int i) {
         itemViewHolder.itemName.setText(inspire_items.get(i));
-        if (inspire_items.get(0).equals(itemViewHolder.itemName.getText())) {
+        if (itemViewHolder.getAdapterPosition() == 0) {
             itemViewHolder.cardView.setBackgroundColor(context.getResources().getColor(R.color.accent_color_light));
             itemViewHolder.itemName.setTextColor(context.getResources().getColor(R.color.primary_color));
+        }
+        else {
+            itemViewHolder.cardView.setBackgroundColor(context.getResources().getColor(android.R.color.white));
+            itemViewHolder.itemName.setTextColor(context.getResources().getColor(R.color.text));
         }
     }
 

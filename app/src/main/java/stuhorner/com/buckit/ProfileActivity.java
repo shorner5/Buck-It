@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -62,6 +63,7 @@ public class ProfileActivity extends AppCompatActivity {
         setupToolbar();
         setupViewPager();
         setUpButtons();
+
     }
 
     private void setUpButtons() {

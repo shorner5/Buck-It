@@ -88,6 +88,7 @@ public class SocialRVAdapter extends RecyclerView.Adapter<SocialRVAdapter.ItemsV
         }
         if (social_items.get(i).getStory() != null) {
             itemViewHolder.story.setText(social_items.get(i).getStory());
+            itemViewHolder.story.setVisibility(View.VISIBLE);
         }
         else {
             itemViewHolder.story.setVisibility(View.GONE);

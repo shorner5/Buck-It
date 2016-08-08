@@ -56,8 +56,10 @@ public class NearMeAdapter extends RecyclerView.Adapter<NearMeAdapter.ItemsViewH
         itemViewHolder.img.setImageBitmap(users.get(i).getImg());
         if (!users.get(i).getItems().isEmpty()) {
             itemViewHolder.item1.setText(users.get(i).getItems().get(0));
+            itemViewHolder.item1.setVisibility(View.VISIBLE);
             if (users.get(i).getItems().size() > 1) {
                 itemViewHolder.item2.setText(users.get(i).getItems().get(1));
+                itemViewHolder.item2.setVisibility(View.VISIBLE);
             }
             else {
                 itemViewHolder.item2.setVisibility(View.GONE);

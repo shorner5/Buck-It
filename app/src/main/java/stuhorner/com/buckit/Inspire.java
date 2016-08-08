@@ -1,9 +1,12 @@
 package stuhorner.com.buckit;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.util.Pair;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +16,7 @@ import android.text.InputFilter;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -255,7 +259,7 @@ public class Inspire extends AppCompatActivity {
 
         ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
             @Override
-            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+            public void onItemClicked(RecyclerView recyclerView, int position, final View v) {
                 newItem = (position == 0) ? editText.getText().toString() : inspire_items.get(position);
                 if (newItem.equals("")) {
                     //show the keyboard
@@ -264,8 +268,36 @@ public class Inspire extends AppCompatActivity {
                     imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
                 }
                 else {
-                    updateFirebase();
-                    v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.scale_down_up));
+                    SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+                    if (position == 0 && !editText.getText().toString().equals(inspire_items.get(position)) && pref.getBoolean("create_warning", true)) {
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putBoolean("create_warning", false);
+                        editor.apply();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(Inspire.this)
+                                .setTitle("Are you sure you want to create a new Buck It?")
+                                .setMessage("It's better to search for suggestions so you can find people around you with similar Buck Its")
+                                .setNegativeButton("Create It", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        updateFirebase();
+                                        v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.scale_down_up));
+                                    }
+                                })
+                                .setPositiveButton("Find Similar Buck Its", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        appBarLayout.setExpanded(false);
+                                        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                                        getAllPotentialBuckits(editText.getText().toString());
+                                    }
+                                });
+                        builder.create().show();
+                    }
+                    else {
+                        updateFirebase();
+                        v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.scale_down_up));
+                    }
                 }
             }
         });
