@@ -65,6 +65,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         //Create tabs and set name and icon
         initTabs(fab, toolbar);
 
+        //start the notification service
+        Intent intent = new Intent(MainActivity.this, FirebaseNotificationService.class);
+        startService(intent);
+
         //initialize the floating action button
         if (fab != null) {
             fab.setOnClickListener(new View.OnClickListener() {

@@ -59,6 +59,8 @@ public class SettingsActivity extends AppCompatActivity {
                     getSharedPreferences("data", MODE_PRIVATE).edit().clear().apply();
                     Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);
                     startActivity(intent);
+                    Intent service = new Intent(SettingsActivity.this, FirebaseNotificationService.class);
+                    stopService(service);
                     finish();
                 }
             });

@@ -2,8 +2,10 @@ package stuhorner.com.buckit;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
@@ -33,6 +35,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 /**
  * Created by Stu on 1/1/2016.
@@ -44,12 +48,14 @@ public class ProfileActivity extends AppCompatActivity {
     private boolean editing, isProfileLoaded;
     private final static int GALLERY_REQUEST = 4;
     private ViewPager viewPager;
+    private ImageView img;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.profile);
         person_name = getIntent().getStringExtra("name");
         UID = getIntent().getStringExtra("uid");
+        img = (ImageView) findViewById(R.id.backdrop);
         Log.d("uid", UID);
 
         initData();
@@ -59,10 +65,18 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setUpButtons() {
+        SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         if (UID.equals(mUser.getUid()) || getIntent().getBooleanExtra("hide_chat_button", false)) {
             if (fab != null) {
                 fab.setVisibility(View.INVISIBLE);
+            }
+        }
+        if (!pref.getBoolean("profile_created", false)) {
+            if (fab != null) {
+                Log.d("showChatButton", "false");
+                fab.setVisibility(View.INVISIBLE);
+                checkFirebaseForProfile();
             }
         }
         if (fab != null) {
@@ -146,7 +160,6 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {
-                    ImageView img = (ImageView) findViewById(R.id.backdrop);
                     byte[] bytes = Base64.decode(dataSnapshot.getValue().toString().getBytes(), Base64.DEFAULT);
                     if (img != null) {
                         img.setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
@@ -238,26 +251,38 @@ public class ProfileActivity extends AppCompatActivity {
         if (requestCode == GALLERY_REQUEST && resultCode == Activity.RESULT_OK) {
             //upload image
             Uri selectedImage = data.getData();
-            BitmapUploadTask task = new BitmapUploadTask(getPathFromURI(selectedImage), "users/" + mUser.getUid() + "/profilePicture");
-            task.execute();
-            BitmapCompressAndUploadTask compressTask = new BitmapCompressAndUploadTask(getPathFromURI(selectedImage), "users/" + mUser.getUid() + "/profilePicSmall");
-            compressTask.execute();
-            Snackbar.make(findViewById(R.id.root_view), getString(R.string.update_soon), Snackbar.LENGTH_SHORT).show();
+            Intent intent = new Intent(ProfileActivity.this, CropImageActivity.class);
+            intent.putExtra("uri", selectedImage.toString());
+            startActivity(intent);
         }
     }
 
-    private String getPathFromURI(Uri uri) {
-        Cursor cursor = null;
-        try {
-            String[] proj = {MediaStore.Images.Media.DATA};
-            cursor = getApplicationContext().getContentResolver().query(uri,proj,null,null,null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
+    private void checkFirebaseForProfile() {
+        Log.d("showChatButton", "firebase");
+        userRef.child(mUser.getUid()).child("profile_created").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null && dataSnapshot.getValue().toString().equals("1")) {
+                    showChatButton();
+                    final SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putBoolean("profile_created", true);
+                    editor.apply();
+                }
             }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void showChatButton() {
+        Log.d("showChatButton", "true");
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        if (fab != null) {
+            fab.setVisibility(View.VISIBLE);
         }
     }
 }

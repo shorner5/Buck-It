@@ -282,10 +282,9 @@ public class CreateProfileActivity extends AppCompatActivity {
         if (requestCode == GALLERY_REQUEST && resultCode == Activity.RESULT_OK) {
             //upload image
             Uri selectedImage = data.getData();
-            BitmapUploadTask task = new BitmapUploadTask(getPathFromURI(selectedImage), "users/" + mUser.getUid() + "/profilePicture");
-            task.execute();
-            BitmapCompressAndUploadTask compressTask = new BitmapCompressAndUploadTask(getPathFromURI(selectedImage), "users/" + mUser.getUid() + "/profilePicSmall");
-            compressTask.execute();
+            Intent intent = new Intent(CreateProfileActivity.this, CropImageActivity.class);
+            intent.putExtra("uri", selectedImage.toString());
+            startActivity(intent);
 
             //save the result
             userRef.child("discoverable").setValue("1");
@@ -295,21 +294,6 @@ public class CreateProfileActivity extends AppCompatActivity {
             editor.apply();
             setResult(RESULT_OK);
             finish();
-        }
-    }
-
-    private String getPathFromURI(Uri uri) {
-        Cursor cursor = null;
-        try {
-            String[] proj = {MediaStore.Images.Media.DATA};
-            cursor = getApplicationContext().getContentResolver().query(uri,proj,null,null,null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
     }
 

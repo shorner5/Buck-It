@@ -38,7 +38,11 @@
         <activity
             android:name=".ChatPage"
             android:parentActivityName=".MainActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
+            android:windowSoftInputMode="adjustResize|stateHidden">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
         <activity
             android:name=".ProfileActivity"
             android:parentActivityName=".MainActivity" />
@@ -55,7 +59,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".CreateProfileActivity" />
-        <activity android:name=".DisplayImageActivity"></activity>
+        <activity android:name=".DisplayImageActivity"/>
+        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"/>
+        <activity android:name=".CropImageActivity"/>
+        <service android:name=".FirebaseNotificationService"/>
+
     </application>
 
 </manifest>

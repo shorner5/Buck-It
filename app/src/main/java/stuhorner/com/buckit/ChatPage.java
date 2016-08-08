@@ -68,7 +68,6 @@ public class ChatPage extends AppCompatActivity {
                     onBackPressed();
                 }
             });
-            Log.d("name", getIntent().getStringExtra("name"));
             if (getIntent().getStringExtra("name") != null && getSupportActionBar() != null)
                 getSupportActionBar().setTitle(getIntent().getStringExtra("name"));
             else

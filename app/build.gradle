@@ -35,6 +35,7 @@ dependencies {
     compile group: 'info.debatty', name: 'java-string-similarity', version: '0.13'
     compile 'com.firebase:geofire-android:2.0.0'
     compile 'com.google.android.gms:play-services-location:9.2.1'
+    compile 'com.theartofdev.edmodo:android-image-cropper:2.2.+'
 }
 
 apply plugin: 'com.google.gms.google-services'

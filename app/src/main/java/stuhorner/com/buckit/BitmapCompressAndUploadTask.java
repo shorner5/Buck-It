@@ -25,20 +25,21 @@ import java.io.FileNotFoundException;
  * Created by Stu on 8/3/2016.
  */
 public class BitmapCompressAndUploadTask extends AsyncTask<String, Void, String> {
-    private String path;
+    private Bitmap bitmap;
     private String savePath;
     private DatabaseReference userRef = FirebaseDatabase.getInstance().getReference();
+    private final static int BITMAP_WIDTH = 216;
+    private final static int BITMAP_HEIGHT = 138;
 
-    public BitmapCompressAndUploadTask(String path, String savePath) {
+    public BitmapCompressAndUploadTask(Bitmap bitmap, String savePath) {
         this.savePath = savePath;
-        this.path = path;
+        this.bitmap = bitmap;
     }
 
     @Override
     protected String doInBackground(String... params) {
-        File file = new File(path);
-        Bitmap bitmap = decodeFile(file);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap = getCircleBitmap(compress(bitmap));
         if (bitmap != null) {
             bitmap.compress(Bitmap.CompressFormat.PNG, 50, baos);
         }
@@ -53,32 +54,10 @@ public class BitmapCompressAndUploadTask extends AsyncTask<String, Void, String>
         }
     }
 
-    private Bitmap decodeFile(File f) {
-        try {
-            // Decode image size
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(new FileInputStream(f), null, o);
-
-            // The new size we want to scale to
-            final int REQUIRED_SIZE = 50;
-
-            // Find the correct scale value. It should be the power of 2.
-            int scale = 1;
-            while (o.outWidth / scale / 2 >= REQUIRED_SIZE &&
-                    o.outHeight / scale / 2 >= REQUIRED_SIZE) {
-                Log.d("scale", Integer.toString(scale));
-                scale *= 2;
-            }
-
-            // Decode with inSampleSize
-            BitmapFactory.Options o2 = new BitmapFactory.Options();
-            o2.inSampleSize = scale;
-            return getCircleBitmap(BitmapFactory.decodeStream(new FileInputStream(f), null, o2));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
+    private Bitmap compress(Bitmap bitmap) {
+        return (bitmap.getWidth() > BITMAP_WIDTH && bitmap.getHeight() > BITMAP_HEIGHT)
+                ? Bitmap.createScaledBitmap(bitmap,BITMAP_WIDTH, BITMAP_HEIGHT, true)
+                : bitmap;
     }
 
     private Bitmap getCircleBitmap(Bitmap bitmap) {

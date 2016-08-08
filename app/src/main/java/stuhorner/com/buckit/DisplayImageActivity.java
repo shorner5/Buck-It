@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 public class DisplayImageActivity extends Activity {
-    private final static int MAX_BITMAP_SIZE = 250000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

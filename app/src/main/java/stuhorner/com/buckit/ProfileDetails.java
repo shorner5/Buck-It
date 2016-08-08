@@ -73,7 +73,7 @@ public class ProfileDetails extends Fragment {
     }
 
     private void initEditText() {
-        editText.setLines(30);
+        editText.setLines(16);
         editText.setHorizontallyScrolling(false);
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
