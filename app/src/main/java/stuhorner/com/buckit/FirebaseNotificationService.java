@@ -9,6 +9,7 @@ import android.app.TaskStackBuilder;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
@@ -33,10 +34,12 @@ public class FirebaseNotificationService extends Service {
     private DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
     private FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
     private HashSet<String> addedUsers = new HashSet<>();
+    private SharedPreferences pref;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        pref = getSharedPreferences("data", MODE_PRIVATE);
         rootRef.child("users").child(mUser.getUid()).child("social").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -99,7 +102,8 @@ public class FirebaseNotificationService extends Service {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("messages onChildAdded", dataSnapshot.getKey());
-                if (dataSnapshot.getKey().equals("last_message") && dataSnapshot.child("sender").getValue().equals(UID) && newUser && !checkApp()) {
+                if (dataSnapshot.getKey().equals("last_message") && dataSnapshot.child("sender").getValue().equals(UID)
+                        && newUser && !checkApp() && pref.getBoolean("messages", true)) {
                     getName(UID, dataSnapshot.child("body").getValue().toString());
                 }
             }
@@ -107,7 +111,8 @@ public class FirebaseNotificationService extends Service {
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 Log.d("messages onChildChanged", dataSnapshot.getKey());
-                if (dataSnapshot.getKey().equals("last_message") && dataSnapshot.child("sender").getValue().equals(UID) && !checkApp()) {
+                if (dataSnapshot.getKey().equals("last_message") && dataSnapshot.child("sender").getValue().equals(UID)
+                        && !checkApp() && pref.getBoolean("messages", true)) {
                     getName(UID, dataSnapshot.child("body").getValue().toString());
                 }
             }

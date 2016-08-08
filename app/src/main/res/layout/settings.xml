@@ -94,7 +94,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Completed Buck Its"
+                    android:text="@string/completed_buck_its"
                     android:textStyle="bold"
                     android:padding="8dp"
                     android:textColor="@color/accent_color_dark"
@@ -138,7 +138,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Search Settings"
+                    android:text="@string/search_settings"
                     android:textStyle="bold"
                     android:padding="8dp"
                     android:textColor="@color/accent_color_dark"
@@ -148,7 +148,7 @@
                 <Switch
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Discoverable"
+                    android:text="@string/discoverable"
                     android:id="@+id/settings_discoverable"
                     android:textSize="@dimen/abc_text_size_medium_material"
                     android:textColor="@color/text"
@@ -179,7 +179,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Notification Settings"
+                    android:text="@string/notification_settings"
                     android:padding="8dp"
                     android:textColor="@color/accent_color_dark"
                     android:textStyle="bold"
@@ -188,27 +188,8 @@
                 <Switch
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="New Matches"
-                    android:id="@+id/setting_new_matches"
-                    android:textSize="@dimen/abc_text_size_medium_material"
-                    android:textColor="@color/text"
-                    android:padding="8dp" />
-
-                <Switch
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Messages"
+                    android:text="@string/settings_messages"
                     android:id="@+id/setting_messages"
-                    android:textSize="@dimen/abc_text_size_medium_material"
-                    android:textColor="@color/text"
-                    android:checked="true"
-                    android:padding="8dp" />
-
-                <Switch
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Likes and Adds"
-                    android:id="@+id/setting_like_add"
                     android:textSize="@dimen/abc_text_size_medium_material"
                     android:textColor="@color/text"
                     android:checked="true"
@@ -220,7 +201,7 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Logout"
+            android:text="@string/logout"
             android:id="@+id/setting_logout"
             android:textColor="@color/text_light"
             android:background="@android:color/white"
@@ -230,7 +211,7 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Delete Account"
+            android:text="@string/delete_account"
             android:id="@+id/setting_delete"
             android:textColor="@color/text_light"
             android:background="@android:color/white"

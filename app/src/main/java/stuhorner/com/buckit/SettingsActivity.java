@@ -49,6 +49,7 @@ public class SettingsActivity extends AppCompatActivity {
         initCompletedBuckits();
         checkProfileCreated();
         initSearchSettings();
+        initNotificationSettings();
 
         Button logOut = (Button) findViewById(R.id.setting_logout);
         if (logOut != null) {
@@ -155,6 +156,26 @@ public class SettingsActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
+    }
+
+    private void initNotificationSettings() {
+        final SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+        Switch messages = (Switch) findViewById(R.id.setting_messages);
+        if (messages != null) {
+            if (pref.getBoolean("messages", true)) {
+                messages.setChecked(true);
+            } else {
+                messages.setChecked(false);
+            }
+            messages.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putBoolean("messages", isChecked);
+                    editor.apply();
+                }
+            });
+        }
     }
 
     private void initNoProfile() {
