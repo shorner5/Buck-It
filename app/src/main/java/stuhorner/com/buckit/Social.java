@@ -13,6 +13,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -44,8 +47,18 @@ public class Social extends Fragment {
         View v = inflater.inflate(R.layout.social, container,false);
         initRecyclerView(v);
         initData();
+        initAdMob(v);
 
         return v;
+    }
+
+    private void initAdMob(View v) {
+        MobileAds.initialize(getContext(), getResources().getString(R.string.app_id));
+        AdView mAdView = (AdView) v.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("8CEBDCE291011B1009AF3996B5D3A55A")
+                .build();
+        mAdView.loadAd(adRequest);
     }
 
     private void initData() {
