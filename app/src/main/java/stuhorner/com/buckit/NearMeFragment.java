@@ -217,11 +217,13 @@ public class NearMeFragment extends Fragment implements LocationReceiver {
         ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
             @Override
             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                Intent intent = new Intent (getActivity(), ProfileActivity.class);
-                intent.putExtra("uid", users.get(position).getUid());
-                intent.putExtra("name", users.get(position).getName());
-                startActivity(intent);
-                getActivity().overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
+                if (position < users.size()) {
+                    Intent intent = new Intent(getActivity(), ProfileActivity.class);
+                    intent.putExtra("uid", users.get(position).getUid());
+                    intent.putExtra("name", users.get(position).getName());
+                    startActivity(intent);
+                    getActivity().overridePendingTransition(R.anim.slide_in, R.anim.fade_out);
+                }
             }
         });
     }

@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -49,6 +50,7 @@ public class ChatPage extends AppCompatActivity {
     ImageButton sendButton;
     EditText editText;
     ChatMessageAdapter adapter;
+    ListView listView;
     boolean active = true;
     DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
     FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -78,7 +80,7 @@ public class ChatPage extends AppCompatActivity {
         initButton();
 
         editText = (EditText) findViewById(R.id.chat_edit_text);
-        final ListView listView = (ListView) findViewById(R.id.chat_messages);
+        listView = (ListView) findViewById(R.id.chat_messages);
         adapter = new ChatMessageAdapter(ChatPage.this, messages);
         if (listView != null) {
             listView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
@@ -256,4 +258,5 @@ public class ChatPage extends AppCompatActivity {
             }
         });
     }
+
 }

@@ -10,9 +10,6 @@ import android.widget.TextView;
 
 import java.util.LinkedList;
 
-/**
- * Created by Stu on 8/5/2016.
- */
 public class NearMeAdapter extends RecyclerView.Adapter<NearMeAdapter.ItemsViewHolder>  {
 
     public static class ItemsViewHolder extends RecyclerView.ViewHolder {

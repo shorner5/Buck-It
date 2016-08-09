@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -184,6 +185,8 @@ public class FirebaseNotificationService extends Service {
         List<ActivityManager.RunningTaskInfo> taskInfo = am.getRunningTasks(1);
 
         ComponentName componentInfo = taskInfo.get(0).topActivity;
-        return (componentInfo.getPackageName().equalsIgnoreCase("stuhorner.com.buckit"));
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+        return (componentInfo.getPackageName().equalsIgnoreCase("stuhorner.com.buckit") && pm.isScreenOn());
     }
 }

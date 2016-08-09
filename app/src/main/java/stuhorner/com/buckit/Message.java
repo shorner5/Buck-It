@@ -6,6 +6,7 @@ package stuhorner.com.buckit;
 public class Message {
     String body;
     String sender;
+    long time;
 
     public Message(String body, String sender) {
         this.body = body;
@@ -20,4 +21,11 @@ public class Message {
         return this.body;
     }
 
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public long getTime() {
+        return time;
+    }
 }

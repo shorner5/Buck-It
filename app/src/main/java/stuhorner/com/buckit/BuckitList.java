@@ -136,8 +136,10 @@ public class BuckitList extends Fragment {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("key", dataSnapshot.getChildren().iterator().next().getKey());
-                rootRef.child("buckits").child(removeItem).child("users").child(dataSnapshot.getChildren().iterator().next().getKey()).setValue(null);
+                if (dataSnapshot.getChildren().iterator().hasNext()) {
+                    Log.d("key", dataSnapshot.getChildren().iterator().next().getKey());
+                    rootRef.child("buckits").child(removeItem).child("users").child(dataSnapshot.getChildren().iterator().next().getKey()).setValue(null);
+                }
             }
 
             @Override

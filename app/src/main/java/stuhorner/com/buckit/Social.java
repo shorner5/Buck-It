@@ -30,9 +30,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-/**
- * Created by Stu on 12/14/2015.
- */
 public class Social extends Fragment {
     private LinkedList<SocialPostHolder> social_items = new LinkedList<>();
     private HashSet<String> userQueue = new HashSet<>();
@@ -47,7 +44,7 @@ public class Social extends Fragment {
         View v = inflater.inflate(R.layout.social, container,false);
         initRecyclerView(v);
         initData();
-        initAdMob(v);
+        //initAdMob(v);
 
         return v;
     }
