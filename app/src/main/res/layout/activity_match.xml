@@ -98,6 +98,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/match_empty"
+                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:layout_centerInParent="true"
                 android:visibility="gone"/>
 
@@ -115,35 +116,78 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:clipChildren="false">
 
-                <ImageButton
+                <View
                     android:layout_width="0dp"
-                    android:layout_height="60dp"
-                    android:id="@+id/chat_button"
-                    android:scaleType="fitCenter"
-                    android:layout_marginStart="32dp"
-                    android:layout_marginBottom="18dp"
-                    android:layout_weight=".5"
-                    android:elevation="8dp"
-                    android:visibility="invisible"
-                    android:background="@android:color/transparent"
-                    android:src="@drawable/ic_chatbutton"
-                    android:layout_marginLeft="32dp" />
+                    android:layout_height="0dp"
+                    android:layout_weight=".2"
+                    android:clipChildren="false"/>
 
-                <ImageButton
+                <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="60dp"
-                    android:layout_weight=".5"
-                    android:id="@+id/next_button"
-                    android:scaleType="fitCenter"
-                    android:layout_marginEnd="32dp"
-                    android:layout_marginBottom="18dp"
-                    android:elevation="8dp"
-                    android:visibility="invisible"
-                    android:background="@android:color/transparent"
-                    android:src="@drawable/ic_yes"
-                    android:layout_marginRight="32dp" />
+                    android:layout_weight=".3"
+                    android:layout_gravity="center"
+                    android:clipChildren="false"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:layout_width="@dimen/circle_size"
+                        android:layout_height="@dimen/circle_size"
+                        android:id="@+id/chat_circle"
+                        android:layout_margin="8dp"
+                        android:visibility="invisible"
+                        android:layout_gravity="center"
+                        android:background="@drawable/circle" />
+
+                    <ImageButton
+                        android:layout_width="@dimen/button_size"
+                        android:layout_height="@dimen/button_size"
+                        android:id="@+id/chat_button"
+                        android:scaleType="fitCenter"
+                        android:layout_gravity="center"
+                        android:elevation="8dp"
+                        android:visibility="invisible"
+                        android:background="@android:color/transparent"
+                        android:src="@drawable/chat"/>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_weight=".3"
+                    android:layout_gravity="center"
+                    android:layout_height="wrap_content"
+                    android:clipChildren="false">
+
+                    <ImageView
+                        android:id="@+id/next_circle"
+                        android:layout_width="@dimen/circle_size"
+                        android:layout_height="@dimen/circle_size"
+                        android:layout_margin="8dp"
+                        android:visibility="invisible"
+                        android:layout_gravity="center"
+                        android:background="@drawable/circle" />
+
+                    <ImageButton
+                        android:layout_width="@dimen/button_size"
+                        android:layout_height="@dimen/button_size"
+                        android:id="@+id/next_button"
+                        android:scaleType="fitCenter"
+                        android:layout_gravity="center"
+                        android:elevation="8dp"
+                        android:visibility="invisible"
+                        android:background="@android:color/transparent"
+                        android:src="@drawable/ic_next"/>
+
+                </FrameLayout>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight=".2"
+                    android:clipChildren="false"/>
 
             </LinearLayout>
         </RelativeLayout>

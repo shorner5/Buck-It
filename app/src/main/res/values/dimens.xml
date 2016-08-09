@@ -12,4 +12,7 @@
     <integer name="medium_size">20</integer>
     <integer name="small_size">10</integer>
 
+    <dimen name="circle_size">100dp</dimen>
+    <dimen name="button_size">80dp</dimen>
+
 </resources>

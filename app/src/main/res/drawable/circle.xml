@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape android:shape="oval"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/button_background" />
+    <gradient android:startColor="@color/emboss"
+        android:angle="45"
+        android:centerColor="@color/button_background"
+        android:endColor="@color/button_background"/>
+</shape>

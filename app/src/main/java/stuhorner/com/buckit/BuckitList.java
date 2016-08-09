@@ -12,6 +12,7 @@ import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -172,7 +173,8 @@ public class BuckitList extends Fragment {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                     if (dataSnapshot.getKey() != null) {
-                        bucket_items.add(dataSnapshot.getKey());
+                        String item = dataSnapshot.getKey();
+                        bucket_items.add(item);
                         showProgress(false);
                         showEmptyList(false);
                         adapter.notifyDataSetChanged();

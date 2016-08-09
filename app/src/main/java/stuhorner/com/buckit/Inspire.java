@@ -88,7 +88,6 @@ public class Inspire extends AppCompatActivity {
         initRecyclerView();
         initAppBarLayout();
         initToolbar();
-        initEditText();
     }
 
     private void initToolbar() {
@@ -147,37 +146,6 @@ public class Inspire extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {}
         });
-    }
-
-    private void initEditText() {
-        InputFilter filter = new InputFilter() {
-            @Override
-            public CharSequence filter(CharSequence source, int start, int end,
-                                       Spanned dest, int dstart, int dend) {
-
-                if (source instanceof SpannableStringBuilder) {
-                    SpannableStringBuilder sourceAsSpannableBuilder = (SpannableStringBuilder)source;
-                    for (int i = end - 1; i >= start; i--) {
-                        char currentChar = source.charAt(i);
-                        if (!Character.isLetterOrDigit(currentChar) && !Character.isSpaceChar(currentChar)) {
-                            sourceAsSpannableBuilder.delete(i, i+1);
-                        }
-                    }
-                    return source;
-                } else {
-                    StringBuilder filteredStringBuilder = new StringBuilder();
-                    for (int i = start; i < end; i++) {
-                        char currentChar = source.charAt(i);
-                        if (Character.isLetterOrDigit(currentChar) || Character.isSpaceChar(currentChar)) {
-                            filteredStringBuilder.append(currentChar);
-                        }
-                    }
-                    return filteredStringBuilder.toString();
-                }
-            }
-        };
-
-        editText.setFilters(new InputFilter[] { filter });
     }
 
     private void initSearch(String searchString) {
@@ -266,8 +234,7 @@ public class Inspire extends AppCompatActivity {
                     editText.requestFocus();
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
-                }
-                else {
+                } else {
                     SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
                     if (position == 0 && !editText.getText().toString().equals(inspire_items.get(position)) && pref.getBoolean("create_warning", true)) {
                         SharedPreferences.Editor editor = pref.edit();
@@ -293,8 +260,7 @@ public class Inspire extends AppCompatActivity {
                                     }
                                 });
                         builder.create().show();
-                    }
-                    else {
+                    } else {
                         updateFirebase();
                         v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.scale_down_up));
                     }
@@ -304,6 +270,12 @@ public class Inspire extends AppCompatActivity {
     }
 
     private void updateFirebase(){
+        newItem = newItem.replace("/", "")
+                .replace(".", "")
+                .replace("$", "")
+                .replace("#", "")
+                .replace("[", "")
+                .replace("]", "");
         rootRef.child("users").child(mUser.getUid()).child("buckits").child(newItem).setValue(ServerValue.TIMESTAMP);
         rootRef.child("buckits").child(newItem).child("users").push().setValue(mUser.getUid());
         rootRef.child("buckits_index").child(newItem).setValue(0);

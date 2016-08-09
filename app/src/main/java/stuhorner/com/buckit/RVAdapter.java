@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -25,11 +26,13 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ItemsViewHolder>{
     public static class ItemsViewHolder extends RecyclerView.ViewHolder{
         TextView itemName;
         CheckBox checkBox;
+        ImageView arrow;
 
         ItemsViewHolder(View itemView) {
             super(itemView);
             itemName = (TextView)itemView.findViewById(R.id.txt);
             checkBox = (CheckBox) itemView.findViewById(R.id.checkbox);
+            arrow = (ImageView) itemView.findViewById(R.id.arrow);
         }
     }
 
@@ -55,6 +58,11 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ItemsViewHolder>{
         itemViewHolder.itemName.setText(bucket_items.get(i));
         if (completed) {
             itemViewHolder.checkBox.setChecked(true);
+            itemViewHolder.arrow.setVisibility(View.INVISIBLE);
+        }
+        else {
+            itemViewHolder.arrow.setVisibility(View.VISIBLE);
+            itemViewHolder.checkBox.setChecked(false);
         }
         itemViewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override

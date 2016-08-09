@@ -22,7 +22,7 @@
 
             <ImageView
                 android:id="@+id/backdrop"
-                android:src="@drawable/ye"
+                android:background="@color/accent_color_dark"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"

@@ -64,7 +64,7 @@
                 android:layout_marginBottom="8dp"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_light"
-                android:textAppearance="?android:attr/textAppearance"
+                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:layout_centerVertical="true"
                 android:layout_toEndOf="@+id/social_like"
                 android:layout_toRightOf="@+id/social_like" />

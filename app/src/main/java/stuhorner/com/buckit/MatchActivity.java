@@ -61,6 +61,7 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
     private HashSet<String> loadingQueue = new HashSet<>();
     private ImageButton nextButton;
     private ImageButton chatButton;
+    private ImageView nextCircle, chatCircle;
     private Button enable, enable_location;
     private ImageView mProgressView;
     private TextView emptyList;
@@ -174,6 +175,8 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
             discoverable();
             addTransition(nextButton, 1);
             addTransition(chatButton, 0);
+            addTransition(chatCircle, 0);
+            addTransition(nextCircle, 1);
             Button enable = (Button) findViewById(R.id.enable_discovery);
             if (enable != null) {
                 enable.setVisibility(View.INVISIBLE);
@@ -261,6 +264,8 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
                 discoverable();
                 addTransition(nextButton, 1);
                 addTransition(chatButton, 0);
+                addTransition(nextCircle, 1);
+                addTransition(chatCircle, 0);
             }
         }
         else if (requestCode == REQUEST_CHECK_SETTINGS) {
@@ -502,13 +507,14 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void addExitTransitions() {
-        Animation animation1 = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.button_slide_down);
-        Animation animation2 = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.button_slide_down);
+        Animation exit = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.button_slide_down);
 
-        nextButton.startAnimation(animation1);
-        chatButton.startAnimation(animation2);
+        nextButton.startAnimation(exit);
+        chatButton.startAnimation(exit);
+        nextCircle.startAnimation(exit);
+        chatCircle.startAnimation(exit);
 
-        animation1.setAnimationListener(new Animation.AnimationListener() {
+        exit.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
 
@@ -518,6 +524,8 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
             public void onAnimationEnd(Animation animation) {
                 nextButton.setVisibility(View.INVISIBLE);
                 chatButton.setVisibility(View.INVISIBLE);
+                nextCircle.setVisibility(View.INVISIBLE);
+                chatCircle.setVisibility(View.INVISIBLE);
                 MatchActivity.super.onBackPressed();
             }
 
@@ -532,6 +540,8 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
     private void initButtons() {
         nextButton = (ImageButton) findViewById(R.id.next_button);
         chatButton = (ImageButton) findViewById(R.id.chat_button);
+        nextCircle = (ImageView) findViewById(R.id.next_circle);
+        chatCircle = (ImageView) findViewById(R.id.chat_circle);
         addAnimation(nextButton);
         addAnimation(chatButton);
 
@@ -543,6 +553,8 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
                 @Override
                 public void onTransitionEnd(Transition transition) {
                     addTransition(nextButton, 1);
+                    addTransition(nextCircle, 1);
+                    addTransition(chatCircle, 0);
                     addTransition(chatButton, 0);
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -560,10 +572,12 @@ public class MatchActivity extends AppCompatActivity implements GoogleApiClient.
         else {
             nextButton.setVisibility(View.VISIBLE);
             chatButton.setVisibility(View.VISIBLE);
+            chatCircle.setVisibility(View.VISIBLE);
+            nextCircle.setVisibility(View.VISIBLE);
         }
     }
 
-    private void addTransition(ImageButton button, int order) {
+    private void addTransition(View button, int order) {
         Animation anim = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.button_slide_up);
         anim.setFillAfter(true);
         anim.setStartOffset(order * 50);

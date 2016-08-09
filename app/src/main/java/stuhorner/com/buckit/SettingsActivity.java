@@ -1,12 +1,14 @@
 package stuhorner.com.buckit;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +16,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -50,7 +54,11 @@ public class SettingsActivity extends AppCompatActivity {
         checkProfileCreated();
         initSearchSettings();
         initNotificationSettings();
+        initButtons();
 
+    }
+
+    private void initButtons() {
         Button logOut = (Button) findViewById(R.id.setting_logout);
         if (logOut != null) {
             logOut.setOnClickListener(new View.OnClickListener() {
@@ -63,6 +71,39 @@ public class SettingsActivity extends AppCompatActivity {
                     Intent service = new Intent(SettingsActivity.this, FirebaseNotificationService.class);
                     stopService(service);
                     finish();
+                }
+            });
+        }
+
+        Button deleteAccount = (Button) findViewById(R.id.setting_delete);
+        if (deleteAccount != null) {
+            deleteAccount.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this)
+                            .setTitle("Delete account?")
+                            .setMessage("Are you sure you want to delete your account?")
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .setPositiveButton("Delete my account", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    userRef.setValue(null);
+                                    mUser.delete();
+                                    mAuth.signOut();
+                                    getSharedPreferences("data", MODE_PRIVATE).edit().clear().apply();
+                                    Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);
+                                    startActivity(intent);
+                                    Intent service = new Intent(SettingsActivity.this, FirebaseNotificationService.class);
+                                    stopService(service);
+                                    finish();
+                                }
+                            });
+                    builder.create().show();
                 }
             });
         }
@@ -233,6 +274,22 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 }
             });
+            if (!pref.getBoolean("discoverable", false)) {
+                userRef.child("discoverable").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getValue() != null && dataSnapshot.getValue().toString().equals("1")) {
+                            discoverable.setChecked(true);
+                            editor.putBoolean("discoverable", true);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
         }
     }
 

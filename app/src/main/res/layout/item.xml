@@ -10,14 +10,12 @@
     card_view:cardCornerRadius="1dp"
     android:foreground="?android:attr/selectableItemBackground"
     android:transitionName="item_title"
-    card_view:cardBackgroundColor="@android:color/white"
-    >
+    card_view:cardBackgroundColor="@android:color/white">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp"
-        >
+        android:padding="16dp">
 
         <CheckBox android:id="@+id/checkbox"
             android:layout_width="30dp"
@@ -41,11 +39,10 @@
             android:layout_toLeftOf="@+id/img"
             android:gravity="center_vertical" />
 
-        <ImageView android:id="@+id/img"
+        <ImageView android:id="@+id/arrow"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:src="@drawable/ic_down"
-            android:rotation="270"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true" />
 

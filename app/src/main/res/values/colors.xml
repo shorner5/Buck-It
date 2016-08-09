@@ -7,4 +7,6 @@
     <color name="divider_light">#bebebe</color>
     <color name="text_light">#aeadad</color>
     <color name="card_bg">#b4d2b5</color>
+    <color name="button_background">#ececec</color>
+    <color name="emboss">#d9d9d9</color>
 </resources>
